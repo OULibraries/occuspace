@@ -1,0 +1,11 @@
+name = Occuspace
+description = integration of Occuspace through the api
+
+core = 7.x
+package = Drupal 7 Development
+
+files[] = occuspace.module
+files[] = occuspace.views.inc
+files[] = handlers/occuspace_handler_field.inc
+files[] = plugins/occuspace_plugin_query.inc
+files[] = occuspace.js
