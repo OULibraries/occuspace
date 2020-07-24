@@ -32,25 +32,22 @@ class occuspace_plugin_query extends views_plugin_query {
     // Disabled Cache to ensure the data is current. could result in slower load times
     $ini = ini_set("soap.wsdl_cache_enabled", "0");
 
-
     // this obviously needs to change
-    $url = 'https://api.occuspace.io/v1/locations';
+    $url = $myOccuspace;
 
     $opts = array(
       'http' =>
         array(
           'method' => 'GET',
 //          'header' => 'Authorization: ' . $occuspaceAuthID
-            'header' => 'Authorization: Bearer EPX7eGPVpjwQ0RKzle2v2WlmRYb0aE'
+            'header' => 'Authorization: Bearer ' . $occuspaceAuthID
         )
     );
 
     $context = stream_context_create($opts);
-
     $newfile = file_get_contents($url, false, $context);
-
     $jsondump = json_decode($newfile);
-
+dsm($jsondump);
 //    $parentGroup = $this->options['parentGroupName'];
 //    $group = $this->options['groupName'];
 ////
@@ -70,7 +67,7 @@ class occuspace_plugin_query extends views_plugin_query {
 //    //loop through results...we don't want what they don't ask for
 //    //so if it's not what they entered in the query settings
 //    //then we just continue on to the next one
-    foreach ($jsondump->Groups as $entry){
+    foreach ($jsondump->data as $entry){
       $row = new stdClass();
       $row->idNumber = isset($entry->id) ? $entry->id : '';
       $row->name = isset($entry->name) ? $entry->name : '-';
