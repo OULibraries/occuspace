@@ -69,5 +69,12 @@ function occuspace_views_data() {
       'handler' => 'occuspace_handler_field',
     ),
   );
+  $data['occuspace']['level'] = array(
+    'title' => t('Level'),
+    'help' => t('The level within the hierarchy. (Parent, Child, etc)'),
+    'field' => array(
+      'handler' => 'occuspace_handler_field',
+    ),
+  );
   return $data;
 }
