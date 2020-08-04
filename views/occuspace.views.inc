@@ -1,7 +1,7 @@
 <?php
 //drupal_add_js(drupal_get_path('module', 'http://labstats.ou.edu/api/public/GetPublicApiData/1001') . '/occuspace.js');
 //drupal_add_css('https://labstats.ou.edu/Content/MapViewer.css', 'external');
-drupal_add_js('https://cdn.jsdelivr.net/excanvas/r3/excanvas.compiled.js', 'external');
+//drupal_add_js('https://cdn.jsdelivr.net/excanvas/r3/excanvas.compiled.js', 'external');
 //drupal_add_js('https://labstats.ou.edu/Scripts/MapViewer.js', 'external');
 
 /**
@@ -40,6 +40,9 @@ function occuspace_views_data() {
     'field' => array(
       'handler' => 'occuspace_handler_field',
     ),
+    'filter' => array(
+        'handler' => 'occuspace_handler_filter_id',
+    ),
   );
   $data['occuspace']['name'] = array(
     'title' => t('Zone Name'),
@@ -54,6 +57,9 @@ function occuspace_views_data() {
     'field' => array(
       'handler' => 'occuspace_handler_field',
     ),
+      'filter' => array(
+          'handler' => 'occuspace_handler_filter_id',
+      ),
   );
   $data['occuspace']['capacity'] = array(
     'title' => t('Capacity'),
@@ -76,5 +82,39 @@ function occuspace_views_data() {
       'handler' => 'occuspace_handler_field',
     ),
   );
+  $data['occuspace']['count'] = array(
+    'title' => t('Count'),
+    'help' => t('The number of people detected right now.'),
+    'field' => array(
+      'handler' => 'occuspace_handler_field',
+    ),
+  );
+  $data['occuspace']['percentage'] = array(
+    'title' => t('Percentage'),
+    'help' => t('The percentage of occupancy currently....um...occupied'),
+    'field' => array(
+      'handler' => 'occuspace_handler_field',
+    ),
+  );
+  $data['occuspace']['timestamp'] = array(
+    'title' => t('Timestamp'),
+    'help' => t('The time (as a string) of the last count'),
+    'field' => array(
+      'handler' => 'occuspace_handler_field',
+    ),
+  );
   return $data;
+}
+
+function occuspace_chart_alter(&$chart, $chart_id) {
+//    dsm('howdy');
+    if ($chart_id === 'view_name__display_name') {
+        $chart['#title_font_size'] = 200;
+    }
+}
+function hook_chart_views_alter(&$chart, $chart_id) {
+//    dsm('howdy');
+    if ($chart_id === 'view_name__display_name') {
+        $chart['#title_font_size'] = 200;
+    }
 }
