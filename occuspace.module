@@ -5,7 +5,8 @@
  */
 function occuspace_views_api() {
   return array(
-    'api' => 3.0
+    'api' => 3,
+    'path' => drupal_get_path('module', 'occuspace') . '/views',
   );
 }
 
@@ -36,10 +37,11 @@ function occuspace_permission() {
   return $modperms;
 }
 
+/**
+ * @return mixed
+ */
 function occuspace_settings() {
-
   $form = array();
-
   $form['occuspace_server'] = array(
     '#type' => 'textfield',
     '#title' => t('Occuspace Server'),
@@ -47,7 +49,13 @@ function occuspace_settings() {
     '#description' => t("Server used for the Occuspace api"),
     '#required' => TRUE,
   );
-
+  $form['occuspace_server_busy'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Occuspace Server for Busyness'),
+    '#default_value' => variable_get('occuspace_server_busy', ""),
+    '#description' => t("Server used for the Occuspace api for the busyness of the zone. Don't put in the number or the word now."),
+    '#required' => TRUE,
+  );
   $form['occuspace_authID'] = array(
     '#type' => 'textfield',
     '#title' => t('Occuspace Authorization ID'),
@@ -55,7 +63,57 @@ function occuspace_settings() {
     '#description' => t("The authorization ID for Occuspace"),
     '#required' => TRUE,
   );
-
   return system_settings_form($form);
+}
 
+
+function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
+    if (strpos($chart_id, 'occuspace') !== false) {
+//        dsm($definition);
+//        dsm($chart);
+//        dsm($chart_id);
+//        dsm($chart['#view']->result);
+        dsm($definition);
+        $data = array();
+        $data[] = array('first', 'second');
+        $count=0;
+        $capacity=0;
+        foreach ($chart['#view']->result as $d) {
+//            dsm($d);
+            $count += $d->count;
+            $capacity += $d->capacity;
+            dsm($count);
+        }
+        $available = ($capacity - $count);
+        $data[] = array('', $capacity);
+        $data[] = array('count', $count);
+        $data[] = array('available', $available);
+        dsm($data);
+//        $datas = array(
+//            array('this', 'that'),
+//            array('what', 58,),
+//            array('yep', 45,),
+//        );
+        $definition['visualization'] = 'PieChart';
+        $definition['options']['pieHole'] = 0.65;
+        $definition['options']['pieStartAngle'] = 90;
+        $definition['options']['colors'] = array(
+            '#d1a8a8', '#841617',
+        );
+//        $definition['options']['height'] = 400;
+//        $definition['options']['width'] = 400;
+//        $definition['options']['chartArea'] = array(
+//            'top' => 24,
+//        );
+        $definition['options']['slices'][0] = array(
+            'color' => 'transparent',
+            'enableInteractivity' => FALSE,
+        );
+        $definition['options']['innerSize'] = '50%';
+        $definition['options']['pieSliceTextStyle']['color'] = 'black';
+        $definition['options']['pieSliceText'] = 'value';
+        $definition['options']['legend']['position'] = 'top';
+        $definition['data_labels'] = TRUE;
+        $definition['data'] = $data;
+    }
 }

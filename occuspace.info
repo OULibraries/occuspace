@@ -4,8 +4,10 @@ description = integration of Occuspace through the api
 core = 7.x
 package = Drupal 7 Development
 
+dependencies[] = charts:charts
+
 files[] = occuspace.module
-files[] = occuspace.views.inc
 files[] = handlers/occuspace_handler_field.inc
 files[] = plugins/occuspace_plugin_query.inc
-files[] = occuspace.js
+files[] = views/occuspace.views.inc
+files[] = views/occuspace_handler_filter_id.inc
