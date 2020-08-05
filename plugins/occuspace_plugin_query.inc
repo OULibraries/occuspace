@@ -55,16 +55,16 @@ class occuspace_plugin_query extends views_plugin_query {
     $jsondump = json_decode($newfile);
 
 //    //loop through results...return only those that correspond to the filters in place in the gui
-      foreach ($jsondump->data as $entry){
-          if ($entry->parentId == null) {
-              $entry->level = 'parent';
-          }
-      }
+//      foreach ($jsondump->data as $entry){
+//          if ($entry->parentId == null) {
+//              $entry->level = 'parent';
+//          }
+//      }
 
       foreach ($jsondump->data as $entry){
 //          dsm($filterNumber);
           if(($filterNumber>0) && ($entry->id != $filterNumber)) {continue;}
-          if(($parentFilterNumber>0) && ($entry->id != $parentFilterNumber)) {continue;}
+          if(($parentFilterNumber>0) && ($entry->parentId != $parentFilterNumber)) {continue;}
 
       $row = new stdClass();
       $row->idNumber = isset($entry->id) ? $entry->id : '';
