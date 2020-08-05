@@ -105,16 +105,3 @@ function occuspace_views_data() {
   );
   return $data;
 }
-
-function occuspace_chart_alter(&$chart, $chart_id) {
-//    dsm('howdy');
-    if ($chart_id === 'view_name__display_name') {
-        $chart['#title_font_size'] = 200;
-    }
-}
-function hook_chart_views_alter(&$chart, $chart_id) {
-//    dsm('howdy');
-    if ($chart_id === 'view_name__display_name') {
-        $chart['#title_font_size'] = 200;
-    }
-}
