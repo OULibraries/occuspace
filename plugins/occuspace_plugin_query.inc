@@ -38,6 +38,7 @@ class occuspace_plugin_query extends views_plugin_query {
     // set the filters based on admin configurations in the gui
     $filterNumber = ($view->display_handler->handlers['filter']['idNumber']->value['value']) ?? 0 ;
     $parentFilterNumber = ($view->display_handler->handlers['filter']['parentId']->value['value']) ?? 0 ;
+    $chartChoice = $this->options['occuspace_chart_choice'];
 
     $url = $myOccuspace;
     $busyUrl = $myOccuspaceBusy;
@@ -87,10 +88,30 @@ class occuspace_plugin_query extends views_plugin_query {
       $row->count = isset($jsondumpBusy->data->count) ? $jsondumpBusy->data->count : '';
       $row->percentage = isset($jsondumpBusy->data->percentage) ? round($jsondumpBusy->data->percentage*100, 2) : '';
       $row->timestamp = isset($jsondumpBusy->data->timestamp) ? $jsondumpBusy->data->timestamp : '';
+      $row->chartChoice = $chartChoice;
 
       $view->result[] = $row;
     }
-
-
   }
+
+  //options for the query settings inside the view GUI
+    function option_definition() {
+        $options = parent::option_definition();
+        $options['occuspace_chart_choice'] = array('default' => 'noGauge');
+        return $options;
+    }
+    //Creating the fields for the query settings in the view GUI
+    function options_form(&$form, &$form_state) {
+        parent::options_form($form, $form_state);
+        $form['occuspace_chart_choice'] = array(
+            '#title' => t('Gauge?'),
+            '#type' => 'radios',
+            '#description' => 'Would you like to be really cool and make this a Gauge chart type?',
+            '#default_value' => $this->options['occuspace_chart_choice'],
+            '#options' => array(
+                'yesGauge' => t('Yes Gauge!'),
+                'noGauge' => t('No Gauge.'),
+            ),
+        );
+    }
 }
