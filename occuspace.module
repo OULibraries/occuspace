@@ -144,24 +144,36 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 // here is where we override highcharts. I kept the same settings above in case some can apply to highcharts.
                 // At first I had this code higher trying to set it up completely separately than google charts code.
                 if ($chart['#chart_library'] == 'highcharts') {
-                    $definition['plotOptions']['pie']['startAngle'] = 90;
-                    $definition['plotOptions']['pie']['size'] = '50%';
-                    $definition['plotOptions']['series']['dataLabels']['enabled'] = TRUE;
-                    $definition['series']['type'] = 'pie';
-                    $definition['series']['name'] = 'TEST';
-                    $definition['series']['innerSize'] = '50%';
-                    $definition['series']['data'] = $data;
-                    // see $definition after
-                    dsm($definition);
+                    $newData[] = array(
+                        'first', 50,
+                    );
+                    $newData[] = array(
+                        'second', 50,
+                    );
+//                    $definition['plotOptions']['pie']['startAngle'] = 90;
+//                    $definition['plotOptions']['pie']['size'] = '50%';
+                    $definition['plotOptions']['pie']['center'] = array(
+                        '50%', '95%',
+                    );
+                    $definition['plotOptions']['pie']['size'] = '110%';
+//                    $definition['plotOptions']['series']['dataLabels']['enabled'] = TRUE;
+//                    $definition['series']['type'] = 'pie';
+//                    $definition['title'] = 'TEST';
+                    $definition['series'][0]['innerSize'] = '50%';
+//                    $definition['chart']['backgroundColor'] = 'blue';
+//                    $definition['chart']['type'] = 'pie';
+                    $definition['series'][0]['data'] = $newData;
+//                    // see $definition after
+//                    dsm($definition);
                 }
             }
             else {
 //                $data[] = array($definition['options']['title'], $count);
                 // try to add gauge js if using highcharts. This is not tested yet.
                 // Was trying to get donut working first.
-                if ($chart['#chart_library'] == 'highcharts') {
-                  drupal_add_js('https://code.highcharts.com/modules/solid-gauge.js', 'external');
-                }
+//                if ($chart['#chart_library'] == 'highcharts') {
+//                  drupal_add_js('https://code.highcharts.com/modules/solid-gauge.js', 'external');
+//                }
                 $data[] = array(round($percentage) . '%', $count);
                 $definition['options']['greenColor'] = '#00B239';
                 $definition['options']['yellowColor'] = '#FFC300';
@@ -177,7 +189,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             $definition['visualization'] = $chartChoice;
 //            $definition['options']['legend']['position'] = 'top';
             $definition['data_labels'] = TRUE;
-            $definition['data'] = $data;
+            $definition['data'] = $newData;
+            dsm($definition);
         }
     }
 }
