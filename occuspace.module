@@ -150,18 +150,37 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $newData[] = array(
                         'second', 50,
                     );
-//                    $definition['plotOptions']['pie']['startAngle'] = 90;
-//                    $definition['plotOptions']['pie']['size'] = '50%';
+
+                    $definition['plotOptions']['pie']['startAngle'] = -90;
+                    $definition['plotOptions']['pie']['endAngle'] = 90;
                     $definition['plotOptions']['pie']['center'] = array(
-                        '50%', '95%',
+                        '50%', '75%',
                     );
+
+                    $definition['plotOptions']['pie']['dataLabels'] = array(
+                        'enabled', 'true',
+                        'distance', -50,
+                        'style', array(
+                            'fontWeight' => 'bold',
+                            'color' => 'black'
+                        )
+                    );
+
+                    $definition['tooltip']['pointFormat'] = '{series.name}: <b>{point.percentage:.1f}%</b>';
                     $definition['plotOptions']['pie']['size'] = '110%';
-//                    $definition['plotOptions']['series']['dataLabels']['enabled'] = TRUE;
-//                    $definition['series']['type'] = 'pie';
-//                    $definition['title'] = 'TEST';
+                    $definition['plotOptions']['series'][0]['dataLabels']['enabled'] = TRUE;
+
+                    $definition['title'] = array(
+                        'text' => 'Available<br>Spaces',
+                        'align' => 'center',
+                        'verticalAlign' => 'middle',
+                        'y' => 60,
+                        'x' => -20
+                    );
+
                     $definition['series'][0]['innerSize'] = '50%';
-//                    $definition['chart']['backgroundColor'] = 'blue';
-//                    $definition['chart']['type'] = 'pie';
+                    $definition['series'][0]['type'] = 'pie';
+                    $definition['series'][0]['name'] = '% Available';
                     $definition['series'][0]['data'] = $newData;
 //                    // see $definition after
 //                    dsm($definition);
@@ -189,7 +208,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             $definition['visualization'] = $chartChoice;
 //            $definition['options']['legend']['position'] = 'top';
             $definition['data_labels'] = TRUE;
-            $definition['data'] = $newData;
+            $definition['data'] = $data;
             dsm($definition);
         }
     }
