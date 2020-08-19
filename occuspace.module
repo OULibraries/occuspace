@@ -98,7 +98,6 @@ function occuspace_settings() {
 
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
-    dsm($chartChoice);
     if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
         if (strpos($chart_id, 'occuspace') !== false) {
             $occuspace_count_label = variable_get('occuspace_count_label', "Occupied");
@@ -203,26 +202,31 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 
                 // here is where we override highcharts.
                 if ($chart['#chart_library'] == 'highcharts') {
-                    drupal_add_js('https://code.highcharts.com/modules/solid-gauge.js', 'external');
+                    drupal_add_js('https://code.highcharts.com/highcharts-more.js', 'external');
 
                     unset($definition['yAxis']);
                     unset($definition['series']);
                     unset($definition['pie']);
                     unset($definition['plotOptions']['pie']);
                     unset($definition['chart']);
+
                     $definition['chart'] = array(
-                        'type' => 'gauge',
-                        'plotBackgroundColor' => null,
-                        'plotBackgroundImage' => null,
-                        'plotBorderWidth' => 0,
-                        'plotShadow' => false
+                        'type' => 'gauge'
                     );
+
+                    //'plotBackgroundColor' => null,
+                    //                        'plotBackgroundImage' => null,
+                    //                        'plotBorderWidth' => 0,
+                    //                        'plotShadow' => false
 
                     $definition['pane'] = array(
                         'size' => '100%',
                         'startAngle' => -150,
-                        'endAngle' => 150,
-                        'background' => [
+                        'endAngle' => 150
+                    );
+
+                    /*
+                     * 'background' => [
                             array(
                                 'backgroundColor' =>
                                     array(
@@ -254,17 +258,17 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                                 'innerRadius' => '103%'
                             )
                         ]
-                    );
+                     */
 
-                    $definition['plotOptions']['solidgauge'] = array(
-                        'innerRadius' => '75%',
-                        'radius' => '100%',
-                        'dataLabels' => array(
-                            'enabled' => true,
-                            'useHTML' => true,
-                            'zIndex' => 1000
-                        )
-                    );
+//                    $definition['plotOptions']['solidgauge'] = array(
+//                        'innerRadius' => '75%',
+//                        'radius' => '100%',
+//                        'dataLabels' => array(
+//                            'enabled' => true,
+//                            'useHTML' => true,
+//                            'zIndex' => 1000
+//                        )
+//                    );
 
                     //$definition['yAxis']['labels']['enabled'] = false;
                     $definition['yAxis'] = array(
@@ -284,24 +288,24 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         'plotBands' => [
                             array(
                                 'from' => 0,
-                                'to' => 120,
+                                'to' => 333,
                                 'color' => '#55BF3B'
                             ),
                             array(
-                                'from' => 120,
-                                'to' => 160,
+                                'from' => 333,
+                                'to' => 666,
                                 'color' => '#DDDF0D'
                             ),
                             array(
-                                'from' => 160,
-                                'to' => 200,
+                                'from' => 666,
+                                'to' => 1000,
                                 'color' => '#DF5353'
                             )
                         ]
                     );
 
-                    $definition['series']['data'] = array(350);
-                    dsm($definition);
+                    $newData = array(350);
+                    $definition['series'][0]['data'] = $newData;
                 }
             }
             $definition['visualization'] = $chartChoice;
