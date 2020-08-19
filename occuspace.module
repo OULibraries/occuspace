@@ -98,12 +98,12 @@ function occuspace_settings() {
 
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
+    $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
     if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
         if (strpos($chart_id, 'occuspace') !== false) {
             $occuspace_count_label = variable_get('occuspace_count_label', "Occupied");
             $occuspace_available_label = variable_get('occuspace_available_label', "Available");
             $occuspace_slice_text_color = variable_get('occuspace_slice_text_color', "White");
-            $occuspace_piehole = variable_get('occuspace_piehole', "0.65");
             $data = array();
             $data[] = array('first', 'second');
             $count = 0;
@@ -121,25 +121,28 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             if ($chartChoice == 'PieChart') {
                 $available = ($capacity - $count);
                 $data[] = array('', $capacity);
-                $data[] = array($occuspace_count_label, $count);
-                $data[] = array($occuspace_available_label, $available);
+                $data[] = array($occuspace_count_label . ' ' . $count, $count);
+                $data[] = array($occuspace_available_label . ' ' . $available, $available);
 
-                $definition['options']['pieHole'] = $occuspace_piehole;
+                $definition['options']['pieHole'] = $pieHole;
                 $definition['options']['pieStartAngle'] = 90;
+//                $definition['options']['legend']['position'] = 'labeled';
+//                $definition['options']['legend']['textStyle']->color = 'black';
                 $definition['options']['slices'][0] = [
                     'color' => 'transparent',
                     'enableInteractivity' => FALSE,
                 ];
-                $definition['options']['innerSize'] = '50%';
+//                $definition['options']['innerSize'] = '50%';
                 $definition['options']['pieSliceTextStyle']['color'] = $occuspace_slice_text_color;
                 $definition['options']['pieSliceTextStyle']['text-anchor'] = 'middle';
-                $definition['options']['pieSliceText'] = 'percentage';
-                $definition['options']['animation']['startup'] = TRUE;
-                $definition['options']['animation']['duration'] = 10000;
-                $definition['options']['animation']['easing'] = 'inAndOut';
+                $definition['options']['pieSliceText'] = 'label';
+
+//                $definition['options']['animation']['startup'] = TRUE;
+//                $definition['options']['animation']['duration'] = 10000;
+//                $definition['options']['animation']['easing'] = 'inAndOut';
 
                 // See Definition before
-                dsm($definition);
+//                dsm($definition);
 
                 // here is where we override highcharts. I kept the same settings above in case some can apply to highcharts.
                 // At first I had this code higher trying to set it up completely separately than google charts code.
@@ -189,7 +192,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             $definition['visualization'] = $chartChoice;
 //            $definition['options']['legend']['position'] = 'top';
             $definition['data_labels'] = TRUE;
-            $definition['data'] = $newData;
+            $definition['data'] = $data;
             dsm($definition);
         }
     }
