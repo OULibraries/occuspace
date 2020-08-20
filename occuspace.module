@@ -58,45 +58,45 @@ function occuspace_settings() {
     '#description' => t("The authorization ID for Occuspace"),
     '#required' => TRUE,
   );
-  $form['occuspace_count_label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Occuspace Count Label'),
-    '#default_value' => variable_get('occuspace_count_label', ""),
-    '#description' => t("The label for the chart indicating the number of people occupying a zone"),
-    '#required' => TRUE,
-  );
-  $form['occuspace_available_label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Occuspace Available Label'),
-    '#default_value' => variable_get('occuspace_available_label', ""),
-    '#description' => t("The label for the chart indicating the number of people that can still enter the zone"),
-    '#required' => TRUE,
-  );
-  $form['occuspace_slice_text_color'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Occuspace Slice Text Color'),
-    '#default_value' => variable_get('occuspace_slice_text_color', 'white'),
-    '#description' => t("The color for the text on the pie slices (hex or color name)."),
-    '#required' => TRUE,
-  );
-  $form['occuspace_piehole'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Occuspace Piehole'),
-    '#size' => 5,
-    '#default_value' => variable_get('occuspace_piehole', 'white'),
-    '#description' => t("The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0."),
-    '#required' => TRUE,
-  );
+//  $form['occuspace_count_label'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Occuspace Count Label'),
+//    '#default_value' => variable_get('occuspace_count_label', ""),
+//    '#description' => t("The label for the chart indicating the number of people occupying a zone"),
+//    '#required' => TRUE,
+//  );
+//  $form['occuspace_available_label'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Occuspace Available Label'),
+//    '#default_value' => variable_get('occuspace_available_label', ""),
+//    '#description' => t("The label for the chart indicating the number of people that can still enter the zone"),
+//    '#required' => TRUE,
+//  );
+//  $form['occuspace_slice_text_color'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Occuspace Slice Text Color'),
+//    '#default_value' => variable_get('occuspace_slice_text_color', 'white'),
+//    '#description' => t("The color for the text on the pie slices (hex or color name)."),
+//    '#required' => TRUE,
+//  );
+//  $form['occuspace_piehole'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Occuspace Piehole'),
+//    '#size' => 5,
+//    '#default_value' => variable_get('occuspace_piehole', 'white'),
+//    '#description' => t("The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0."),
+//    '#required' => TRUE,
+//  );
   return system_settings_form($form);
 }
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
     $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
+    $occuspace_slice_text_color = $chart['#view']->query->options['occuspace_slice_text_color'];
+    $occuspace_available_label = $chart['#view']->query->options['occuspace_available_label'];
+    $occuspace_count_label = $chart['#view']->query->options['occuspace_count_label'];
     if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
         if (strpos($chart_id, 'occuspace') !== false) {
-            $occuspace_count_label = variable_get('occuspace_count_label', "Occupied");
-            $occuspace_available_label = variable_get('occuspace_available_label', "Available");
-            $occuspace_slice_text_color = variable_get('occuspace_slice_text_color', "White");
             $data = array();
             $data[] = array('first', 'second');
             $count = 0;
@@ -122,15 +122,10 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     'color' => 'transparent',
                     'enableInteractivity' => FALSE,
                 ];
-//                $definition['options']['innerSize'] = '50%';
                 $definition['options']['pieSliceTextStyle']['color'] = $occuspace_slice_text_color;
                 $definition['options']['pieSliceTextStyle']['text-anchor'] = 'middle';
                 $definition['options']['pieSliceText'] = 'label';
-//                $definition['options']['animation']['startup'] = TRUE;
-//                $definition['options']['animation']['duration'] = 10000;
-//                $definition['options']['animation']['easing'] = 'inAndOut';
-                // See Definition before
-//                dsm($definition);
+                $definition['options']['tooltip']['ignoreBounds'] = true;
                 // here is where we override highcharts.
                 if ($chart['#chart_library'] == 'highcharts') {
                     $newData[] = array(
