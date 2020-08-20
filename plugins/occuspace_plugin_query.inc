@@ -98,6 +98,7 @@ class occuspace_plugin_query extends views_plugin_query {
     function option_definition() {
         $options = parent::option_definition();
         $options['occuspace_chart_choice'] = array('default' => 'noGauge');
+        $options['occuspace_pieHole'] = array('default' => 65);
         return $options;
     }
     //Creating the fields for the query settings in the view GUI
@@ -112,6 +113,13 @@ class occuspace_plugin_query extends views_plugin_query {
                 'yesGauge' => t('Yes Gauge!'),
                 'noGauge' => t('No Gauge.'),
             ),
+        );
+        $form['occuspace_pieHole'] = array(
+            '#title' => t('Pie Hole'),
+            '#type' => 'textfield',
+            '#description' => 'The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0.',
+            '#default_value' => $this->options['occuspace_pieHole'],
+            '#size' => 3,
         );
     }
 }

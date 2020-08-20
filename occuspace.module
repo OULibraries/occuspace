@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Implementation of hook_views_api().
  */
@@ -9,7 +8,6 @@ function occuspace_views_api() {
     'path' => drupal_get_path('module', 'occuspace') . '/views',
   );
 }
-
 /**
  * Implements hook_menu().
  */
@@ -24,10 +22,8 @@ function occuspace_menu() {
     'access arguments' => array('administer occuspace settings'),
     'weight' => -10,
   );
-
   return $items;
 }
-
 function occuspace_permission() {
   $modperms = array(
     'administer occuspace settings' => array(
@@ -36,7 +32,6 @@ function occuspace_permission() {
   );
   return $modperms;
 }
-
 /**
  * @return mixed
  */
@@ -94,16 +89,14 @@ function occuspace_settings() {
   );
   return system_settings_form($form);
 }
-
-
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
+    $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
     if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
         if (strpos($chart_id, 'occuspace') !== false) {
             $occuspace_count_label = variable_get('occuspace_count_label', "Occupied");
             $occuspace_available_label = variable_get('occuspace_available_label', "Available");
             $occuspace_slice_text_color = variable_get('occuspace_slice_text_color', "White");
-            $occuspace_piehole = variable_get('occuspace_piehole', "0.65");
             $data = array();
             $data[] = array('first', 'second');
             $count = 0;
@@ -121,26 +114,23 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             if ($chartChoice == 'PieChart') {
                 $available = ($capacity - $count);
                 $data[] = array('', $capacity);
-                $data[] = array($occuspace_count_label, $count);
-                $data[] = array($occuspace_available_label, $available);
-
-                $definition['options']['pieHole'] = $occuspace_piehole;
+                $data[] = array($occuspace_count_label . ' ' . $count, $count);
+                $data[] = array($occuspace_available_label . ' ' . $available, $available);
+                $definition['options']['pieHole'] = $pieHole;
                 $definition['options']['pieStartAngle'] = 90;
                 $definition['options']['slices'][0] = [
                     'color' => 'transparent',
                     'enableInteractivity' => FALSE,
                 ];
-                $definition['options']['innerSize'] = '50%';
+//                $definition['options']['innerSize'] = '50%';
                 $definition['options']['pieSliceTextStyle']['color'] = $occuspace_slice_text_color;
                 $definition['options']['pieSliceTextStyle']['text-anchor'] = 'middle';
-                $definition['options']['pieSliceText'] = 'percentage';
-                $definition['options']['animation']['startup'] = TRUE;
-                $definition['options']['animation']['duration'] = 10000;
-                $definition['options']['animation']['easing'] = 'inAndOut';
-
+                $definition['options']['pieSliceText'] = 'label';
+//                $definition['options']['animation']['startup'] = TRUE;
+//                $definition['options']['animation']['duration'] = 10000;
+//                $definition['options']['animation']['easing'] = 'inAndOut';
                 // See Definition before
-                //dsm($definition);
-
+//                dsm($definition);
                 // here is where we override highcharts.
                 if ($chart['#chart_library'] == 'highcharts') {
                     $newData[] = array(
@@ -149,7 +139,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $newData[] = array(
                         'Available' => 1000,
                     );
-
                     $definition['plotOptions']['pie']['startAngle'] = -90;
                     $definition['plotOptions']['pie']['endAngle'] = 90;
                     $definition['plotOptions']['pie']['allowPointSelect'] = true;
@@ -158,7 +147,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $definition['plotOptions']['pie']['center'] = array(
                         '50%', '75%',
                     );
-
                     $definition['plotOptions']['pie']['dataLabels'] = array(
                         'enabled' => 'true',
                         'distance' => -50,
@@ -169,11 +157,9 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         ),
                         'format' => '{point.y:,.0f}'
                     );
-
                     $definition['tooltip']['pointFormat'] = '{point.percentage:.1f}%';
                     $definition['plotOptions']['pie']['size'] = '110%';
                     $definition['plotOptions']['series'][0]['dataLabels']['enabled'] = TRUE;
-
                     $definition['title'] = array(
                         'text' => '%<br>Occupied',
                         'align' => 'center',
@@ -181,7 +167,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         'y' => 50,
                         'x' => 0
                     );
-
                     $definition['series'][0]['innerSize'] = '50%';
                     $definition['series'][0]['type'] = 'pie';
                     $definition['series'][0]['data'] = $newData;
@@ -199,32 +184,26 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 $definition['options']['redFrom'] = $capacity*.9;
                 $definition['options']['redTo'] = $capacity;
                 $definition['options']['max'] = $capacity;
-
                 // here is where we override highcharts.
                 if ($chart['#chart_library'] == 'highcharts') {
                     drupal_add_js('https://code.highcharts.com/highcharts-more.js', 'external');
-
                     unset($definition['yAxis']);
                     unset($definition['series']);
                     unset($definition['pie']);
                     unset($definition['plotOptions']['pie']);
                     unset($definition['chart']);
-
                     $definition['chart'] = array(
                         'type' => 'gauge'
                     );
-
                     //'plotBackgroundColor' => null,
                     //                        'plotBackgroundImage' => null,
                     //                        'plotBorderWidth' => 0,
                     //                        'plotShadow' => false
-
                     $definition['pane'] = array(
                         'size' => '100%',
                         'startAngle' => -150,
                         'endAngle' => 150
                     );
-
                     /*
                      * 'background' => [
                             array(
@@ -259,7 +238,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                             )
                         ]
                      */
-
 //                    $definition['plotOptions']['solidgauge'] = array(
 //                        'innerRadius' => '75%',
 //                        'radius' => '100%',
@@ -269,7 +247,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 //                            'zIndex' => 1000
 //                        )
 //                    );
-
                     //$definition['yAxis']['labels']['enabled'] = false;
                     $definition['yAxis'] = array(
                         'min' => 0,
@@ -303,13 +280,12 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                             )
                         ]
                     );
-
                     $newData = array(350);
                     $definition['series'][0]['data'] = $newData;
                 }
             }
             $definition['visualization'] = $chartChoice;
-            //$definition['options']['legend']['position'] = 'top';
+//            $definition['options']['legend']['position'] = 'top';
             $definition['data_labels'] = TRUE;
             $definition['data'] = $data;
         }

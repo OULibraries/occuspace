@@ -3,7 +3,7 @@
 //drupal_add_css('https://labstats.ou.edu/Content/MapViewer.css', 'external');
 //drupal_add_js('https://cdn.jsdelivr.net/excanvas/r3/excanvas.compiled.js', 'external');
 //drupal_add_js('https://labstats.ou.edu/Scripts/MapViewer.js', 'external');
-//drupal_add_js('https://code.highcharts.com/highcharts.js', 'external');
+drupal_add_js('https://code.highcharts.com/highcharts.js', 'external');
 
 /**
  * Implements hook_views_plugins().
