@@ -58,35 +58,6 @@ function occuspace_settings() {
     '#description' => t("The authorization ID for Occuspace"),
     '#required' => TRUE,
   );
-//  $form['occuspace_count_label'] = array(
-//    '#type' => 'textfield',
-//    '#title' => t('Occuspace Count Label'),
-//    '#default_value' => variable_get('occuspace_count_label', ""),
-//    '#description' => t("The label for the chart indicating the number of people occupying a zone"),
-//    '#required' => TRUE,
-//  );
-//  $form['occuspace_available_label'] = array(
-//    '#type' => 'textfield',
-//    '#title' => t('Occuspace Available Label'),
-//    '#default_value' => variable_get('occuspace_available_label', ""),
-//    '#description' => t("The label for the chart indicating the number of people that can still enter the zone"),
-//    '#required' => TRUE,
-//  );
-//  $form['occuspace_slice_text_color'] = array(
-//    '#type' => 'textfield',
-//    '#title' => t('Occuspace Slice Text Color'),
-//    '#default_value' => variable_get('occuspace_slice_text_color', 'white'),
-//    '#description' => t("The color for the text on the pie slices (hex or color name)."),
-//    '#required' => TRUE,
-//  );
-//  $form['occuspace_piehole'] = array(
-//    '#type' => 'textfield',
-//    '#title' => t('Occuspace Piehole'),
-//    '#size' => 5,
-//    '#default_value' => variable_get('occuspace_piehole', 'white'),
-//    '#description' => t("The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0."),
-//    '#required' => TRUE,
-//  );
   return system_settings_form($form);
 }
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
@@ -95,6 +66,9 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $occuspace_slice_text_color = $chart['#view']->query->options['occuspace_slice_text_color'];
     $occuspace_available_label = $chart['#view']->query->options['occuspace_available_label'];
     $occuspace_count_label = $chart['#view']->query->options['occuspace_count_label'];
+    $greenColor = $chart['#view']->query->options['occuspace_green_color'];
+    $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
+    $redColor = $chart['#view']->query->options['occuspace_red_color'];
     if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
         if (strpos($chart_id, 'occuspace') !== false) {
             $data = array();
@@ -172,10 +146,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 
                 $greenTo = $yellowFrom = $capacity*.75;
                 $yellowTo = $redFrom = $capacity*.9;
-                $greenColor = '#00B239';
-                $yellowColor = '#FFC300';
-                $redColor = '#B20000';
-
                 $definition['options']['greenColor'] = $greenColor;
                 $definition['options']['yellowColor'] = $yellowColor;
                 $definition['options']['redColor'] = $redColor;
