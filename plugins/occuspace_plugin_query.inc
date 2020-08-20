@@ -102,6 +102,9 @@ class occuspace_plugin_query extends views_plugin_query {
         $options['occuspace_slice_text_color'] = array('default' => 'white');
         $options['occuspace_available_label'] = array('default' => 'Available');
         $options['occuspace_count_label'] = array('default' => 'People');
+        $options['occuspace_green_color'] = array('default' => '#00B239');
+        $options['occuspace_yellow_color'] = array('default' => '#FFC300');
+        $options['occuspace_red_color'] = array('default' => '#B20000');
         return $options;
     }
     //Creating the fields for the query settings in the view GUI
@@ -141,6 +144,24 @@ class occuspace_plugin_query extends views_plugin_query {
             '#type' => 'textfield',
             '#description' => 'The label for the chart indicating the number of people occupying a zone.',
             '#default_value' => $this->options['occuspace_count_label'],
+        );
+        $form['occuspace_green_color'] = array(
+            '#title' => t('Green (First) Color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the first section of the chart (hex or color name).',
+            '#default_value' => $this->options['occuspace_green_color'],
+        );
+        $form['occuspace_yellow_color'] = array(
+            '#title' => t('Yellow (Second) Color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the second section of the chart (hex or color name).',
+            '#default_value' => $this->options['occuspace_yellow_color'],
+        );
+        $form['occuspace_red_color'] = array(
+            '#title' => t('Red (Last) Color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the last section of the chart (hex or color name).',
+            '#default_value' => $this->options['occuspace_red_color'],
         );
     }
 }
