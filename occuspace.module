@@ -174,14 +174,21 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             }
             else {
                 $data[] = array(round($percentage) . '%', $count);
-                $definition['options']['greenColor'] = '#00B239';
-                $definition['options']['yellowColor'] = '#FFC300';
-                $definition['options']['redColor'] = '#B20000';
+
+                $greenTo = $yellowFrom = $capacity*.75;
+                $yellowTo = $redFrom = $capacity*.9;
+                $greenColor = '#00B239';
+                $yellowColor = '#FFC300';
+                $redColor = '#B20000';
+
+                $definition['options']['greenColor'] = $greenColor;
+                $definition['options']['yellowColor'] = $yellowColor;
+                $definition['options']['redColor'] = $redColor;
                 $definition['options']['greenFrom'] = 0;
-                $definition['options']['greenTo'] = $capacity*.75;
-                $definition['options']['yellowFrom'] = $capacity*.75;
-                $definition['options']['yellowTo'] = $capacity*.9;
-                $definition['options']['redFrom'] = $capacity*.9;
+                $definition['options']['greenTo'] = $greenTo;
+                $definition['options']['yellowFrom'] = $yellowFrom;
+                $definition['options']['yellowTo'] = $yellowTo;
+                $definition['options']['redFrom'] = $redFrom;
                 $definition['options']['redTo'] = $capacity;
                 $definition['options']['max'] = $capacity;
                 // here is where we override highcharts.
@@ -195,59 +202,13 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $definition['chart'] = array(
                         'type' => 'gauge'
                     );
-                    //'plotBackgroundColor' => null,
-                    //                        'plotBackgroundImage' => null,
-                    //                        'plotBorderWidth' => 0,
-                    //                        'plotShadow' => false
+
                     $definition['pane'] = array(
                         'size' => '100%',
                         'startAngle' => -150,
                         'endAngle' => 150
                     );
-                    /*
-                     * 'background' => [
-                            array(
-                                'backgroundColor' =>
-                                    array(
-                                        'linearGradient' => array('x1'=>0, 'y1'=>0, 'x2'=>0, 'y2'=>1),
-                                        'stops' => [
-                                            ['0', '#FFF'],
-                                            ['1', '#333']
-                                        ]
-                                    ),
-                                'borderWidth' => 0,
-                                'outerRadius' => '109%'
-                            ),
-                            array(
-                                'backgroundColor' =>
-                                    array(
-                                        'linearGradient' => array('x1'=>0, 'y1'=>0, 'x2'=>0, 'y2'=>1),
-                                        'stops' => [
-                                            ['0', '#333'],
-                                            ['1', '#FFF']
-                                        ]
-                                    ),
-                                'borderWidth' => 1,
-                                'outerRadius' => '107%'
-                            ),
-                            array(
-                                'backgroundColor' => '#DDD',
-                                'borderWidth' => 0,
-                                'outerRadius' => '105%',
-                                'innerRadius' => '103%'
-                            )
-                        ]
-                     */
-//                    $definition['plotOptions']['solidgauge'] = array(
-//                        'innerRadius' => '75%',
-//                        'radius' => '100%',
-//                        'dataLabels' => array(
-//                            'enabled' => true,
-//                            'useHTML' => true,
-//                            'zIndex' => 1000
-//                        )
-//                    );
-                    //$definition['yAxis']['labels']['enabled'] = false;
+
                     $definition['yAxis'] = array(
                         'min' => 0,
                         'max' => 1000,
@@ -265,23 +226,23 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         'plotBands' => [
                             array(
                                 'from' => 0,
-                                'to' => 333,
-                                'color' => '#55BF3B'
+                                'to' => $greenTo,
+                                'color' => $greenColor
                             ),
                             array(
-                                'from' => 333,
-                                'to' => 666,
-                                'color' => '#DDDF0D'
+                                'from' => $yellowFrom,
+                                'to' => $yellowTo,
+                                'color' => $yellowColor
                             ),
                             array(
-                                'from' => 666,
-                                'to' => 1000,
-                                'color' => '#DF5353'
+                                'from' => $redFrom,
+                                'to' => $capacity,
+                                'color' => $redColor
                             )
                         ]
                     );
-                    $newData = array(350);
-                    $definition['series'][0]['data'] = $newData;
+
+                    $definition['series'][0]['data'] = array($count);
                 }
             }
             $definition['visualization'] = $chartChoice;
