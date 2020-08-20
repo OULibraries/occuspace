@@ -211,7 +211,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 
                     $definition['yAxis'] = array(
                         'min' => 0,
-                        'max' => 1000,
+                        'max' => $capacity,
                         'gridLineColor' => 'transparent',
                         'lineColor' => 'transparent',
                         'minorTickInterval' => 'auto',
@@ -242,6 +242,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         ]
                     );
 
+                    $definition['tooltip']['pointFormat'] = round($percentage).'% Occupied';
                     $definition['series'][0]['data'] = array($count);
                 }
             }
