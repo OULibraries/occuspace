@@ -99,6 +99,9 @@ class occuspace_plugin_query extends views_plugin_query {
         $options = parent::option_definition();
         $options['occuspace_chart_choice'] = array('default' => 'noGauge');
         $options['occuspace_pieHole'] = array('default' => 65);
+        $options['occuspace_slice_text_color'] = array('default' => 'white');
+        $options['occuspace_available_label'] = array('default' => 'Available');
+        $options['occuspace_count_label'] = array('default' => 'People');
         return $options;
     }
     //Creating the fields for the query settings in the view GUI
@@ -120,6 +123,24 @@ class occuspace_plugin_query extends views_plugin_query {
             '#description' => 'The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0.',
             '#default_value' => $this->options['occuspace_pieHole'],
             '#size' => 3,
+        );
+        $form['occuspace_slice_text_color'] = array(
+            '#title' => t('Slice Text Color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the text on the pie slices (hex or color name).',
+            '#default_value' => $this->options['occuspace_slice_text_color'],
+        );
+        $form['occuspace_available_label'] = array(
+            '#title' => t('Available label'),
+            '#type' => 'textfield',
+            '#description' => 'The label for the chart indicating the number of people that can still enter the zone.',
+            '#default_value' => $this->options['occuspace_available_label'],
+        );
+        $form['occuspace_count_label'] = array(
+            '#title' => t('Count label'),
+            '#type' => 'textfield',
+            '#description' => 'The label for the chart indicating the number of people occupying a zone.',
+            '#default_value' => $this->options['occuspace_count_label'],
         );
     }
 }
