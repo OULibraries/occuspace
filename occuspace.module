@@ -236,7 +236,6 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                             )
                         ]
                     );
-
                     $definition['series'][0]['data'] = array($count);
                 }
             }
