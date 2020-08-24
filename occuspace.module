@@ -60,6 +60,7 @@ function occuspace_settings() {
   );
   return system_settings_form($form);
 }
+
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
     $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
@@ -181,12 +182,13 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         'lineColor' => 'transparent',
                         'minorTickInterval' => 'auto',
                         'minorTickWidth' => 1,
-                        'minorTickLength' => 10,
-                        'tickPixelInterval' => 30,
-                        'tickColor' => '#666',
+                        'minorTickLength' => 3,
+                        'minorTickColor' => '#000000',
+                        'tickPixelInterval' => 100,
+                        'tickColor' => '#000000',
                         'tickPosition' => 'inside',
                         'tickLength' => 10,
-                        'tickWidth' => 2,
+                        'tickWidth' => 5,
                         'zIndex' => 100,
                         'plotBands' => [
                             array(
@@ -207,8 +209,28 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         ]
                     );
 
+                    $definition['plotOptions']['gauge']['dataLabels'] = array(
+                        'enabled' => 'true',
+                        'distance' => -50,
+                        'style' => array(
+                            'fontWeight' => 'bold',
+                            'color' => 'black',
+                            'size' => '20px'
+                        ),
+                        'format' => '{point.y:,.0f}'
+                    );
+
                     $definition['tooltip']['pointFormat'] = round($percentage).'% Occupied';
                     $definition['series'][0]['data'] = array($count);
+                    $definition['series'][0]['dataLabels'] = array(
+                        'enabled' => true,
+                        'style' => array(
+                            'fontWeight' => 'bold',
+                            'fontSize' => '20px'
+                        ),
+                        'format' => '{y} '.$occuspace_count_label
+                    );
+                    $definition['options']['lang']['thousandsSep'] = ',';
                 }
             }
             $definition['visualization'] = $chartChoice;
