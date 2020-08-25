@@ -98,6 +98,7 @@ class occuspace_plugin_query extends views_plugin_query {
     function option_definition() {
         $options = parent::option_definition();
         $options['occuspace_chart_choice'] = array('default' => 'noGauge');
+        $options['occuspace_data_format_type'] = array('default' => 'people');
         $options['occuspace_pieHole'] = array('default' => 65);
         $options['occuspace_slice_text_color'] = array('default' => 'white');
         $options['occuspace_available_label'] = array('default' => 'Available');
@@ -120,6 +121,18 @@ class occuspace_plugin_query extends views_plugin_query {
                 'noGauge' => t('No Gauge.'),
             ),
         );
+
+        $form['occuspace_data_format_type'] = array(
+            '#title' => t('Data Format'),
+            '#type' => 'radios',
+            '#description' => 'How would you like the data formatted?',
+            '#default_value' => $this->options['occuspace_data_format_type'],
+            '#options' => array(
+                'people' => t('Number of people'),
+                'percentage' => t('Percentage of Occupancy'),
+            ),
+        );
+
         $form['occuspace_pieHole'] = array(
             '#title' => t('Pie Hole'),
             '#type' => 'textfield',
