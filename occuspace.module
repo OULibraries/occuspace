@@ -71,6 +71,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $greenColor = $chart['#view']->query->options['occuspace_green_color'];
     $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
     $redColor = $chart['#view']->query->options['occuspace_red_color'];
+    $chart_width = $chart['#width'];
+    $chart_height = $chart['#height'];
     if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
         if (strpos($chart_id, 'occuspace') !== false) {
             $data = array();
@@ -170,7 +172,9 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $occupied_percentage = round((intval($count)/intval($capacity)) * 100);
 
                     $definition['chart'] = array(
-                        'type' => 'gauge'
+                        'type' => 'gauge',
+                        'width' => $chart_width,
+                        'height' => $chart_height
                     );
 
                     $definition['pane'] = array(
