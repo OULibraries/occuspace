@@ -73,7 +73,99 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $redColor = $chart['#view']->query->options['occuspace_red_color'];
     $chart_width = $chart['#width'];
     $chart_height = $chart['#height'];
-    if ($chart['#chart_type'] == 'pie' || $chartChoice == 'yesGauge') {
+
+    if ($chart['#chart_type'] == 'bar') {
+        drupal_add_js('https://rawgit.com/highcharts/rounded-corners/master/rounded-corners.js', 'external');
+//        $count = 0;
+//        $capacity = 0;
+//        $percs = 0;
+//        $numOfRecords = 0;
+//
+//        foreach ($chart['#view']->result as $d) {
+//            $numOfRecords ++;
+//            $percs += $d->percentage;
+//            $count += $d->count;
+//            $capacity += $d->capacity;
+//            dsm($count);
+//            dsm($capacity);
+//        }
+//        $percentage = $percs/$numOfRecords;
+//        //$data[] = array(round($percentage) . '%', $count);
+
+        $count = 1900;
+        $capacity = 4000;
+        $occupied_percentage = round((intval($count)/intval($capacity)) * 100);
+
+        $definition['chart'] = array(
+            'type' => 'bar',
+            'width' => $chart_width,
+            'height' => 90
+        );
+        $definition['credits'] = false;
+        $definition['tooltip'] = false;
+        $definition['legend'] = false;
+
+        $definition['xAxis'] = array(
+            'visible' => false
+        );
+        $definition['yAxis'] = array(
+            'visible' => false,
+            'min' => '0',
+            'max' => '100'
+        );
+
+        $capacity_color = $chart['#view']->style_options['field_colors']['capacity'];
+        $count_color = $chart['#view']->style_options['field_colors']['count'];
+
+        $definition['series'] = [
+            array(
+                'data' => array(100),
+                'grouping' => false,
+                'animation' => false,
+                'enableMouseTracking' => false,
+                'showInLegend' => false,
+                'color' => $capacity_color,
+                'pointWidth' => 25,
+                'borderWidth' => 0,
+                'borderRadiusTopLeft' => '4px',
+                'borderRadiusTopRight' => '4px',
+                'borderRadiusBottomLeft' => '4px',
+                'borderRadiusBottomRight' => '4px',
+                'dataLabels' => array(
+                    'className' => 'highlight',
+                    'format' => $count.'  / '.$capacity,
+                    'enabled' => true,
+                    'align' => 'right',
+                    'style' => array(
+                        'color' => 'white',
+                        'textOutline' => false,
+                    )
+                )
+            ), array(
+                'enableMouseTracking' => false,
+                'data' => array($occupied_percentage),
+                'borderRadiusBottomLeft' => '4px',
+                'borderRadiusBottomRight' => '4px',
+                'color' => $count_color,
+                'borderWidth' => 0,
+                'pointWidth' => 25,
+                'animation' => array(
+                    'duration' => 250,
+                ),
+                'dataLabels' => array(
+                    'enabled' => true,
+                    'inside' => true,
+                    'align' => 'left',
+                    'format' => '{point.y}%',
+                    'style' => array(
+                        'color' => 'white',
+                        'textOutline' => false,
+                    )
+                )
+            )
+        ];
+    }
+    if ($chart['#chart_type'] == 'pie') {
         if (strpos($chart_id, 'occuspace') !== false) {
             $data = array();
             $data[] = array('first', 'second');
