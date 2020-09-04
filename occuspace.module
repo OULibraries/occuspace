@@ -76,30 +76,30 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 
     if ($chart['#chart_type'] == 'bar') {
         drupal_add_js('https://rawgit.com/highcharts/rounded-corners/master/rounded-corners.js', 'external');
-//        $count = 0;
-//        $capacity = 0;
-//        $percs = 0;
-//        $numOfRecords = 0;
-//
-//        foreach ($chart['#view']->result as $d) {
-//            $numOfRecords ++;
-//            $percs += $d->percentage;
-//            $count += $d->count;
-//            $capacity += $d->capacity;
+        $count = 0;
+        $capacity = 0;
+        $percs = 0;
+        $numOfRecords = 0;
+
+        foreach ($chart['#view']->result as $d) {
+            $numOfRecords ++;
+            $percs += $d->percentage;
+            $count += $d->count;
+            $capacity += $d->capacity;
 //            dsm($count);
 //            dsm($capacity);
-//        }
+        }
 //        $percentage = $percs/$numOfRecords;
 //        //$data[] = array(round($percentage) . '%', $count);
 
-        $count = 1900;
-        $capacity = 4000;
+//        $count = 1900;
+//        $capacity = 4000;
         $occupied_percentage = round((intval($count)/intval($capacity)) * 100);
 
         $definition['chart'] = array(
             'type' => 'bar',
             'width' => $chart_width,
-            'height' => 90
+            'height' => 85
         );
         $definition['credits'] = false;
         $definition['tooltip'] = false;
@@ -113,6 +113,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             'min' => '0',
             'max' => '100'
         );
+        $definition['plotOptions']['bar']['pointPadding'] = 0;
 
         $capacity_color = $chart['#view']->style_options['field_colors']['capacity'];
         $count_color = $chart['#view']->style_options['field_colors']['count'];
@@ -127,25 +128,31 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 'color' => $capacity_color,
                 'pointWidth' => 25,
                 'borderWidth' => 0,
-                'borderRadiusTopLeft' => '4px',
-                'borderRadiusTopRight' => '4px',
-                'borderRadiusBottomLeft' => '4px',
-                'borderRadiusBottomRight' => '4px',
+                'borderRadiusTopLeft' => '10px',
+                'borderRadiusTopRight' => '10px',
+                'borderRadiusBottomLeft' => '11px',
+                'borderRadiusBottomRight' => '11px',
                 'dataLabels' => array(
-                    'className' => 'highlight',
-                    'format' => $count.'  / '.$capacity,
+//                    'className' => 'highlight',
+//                    'format' => $count.' people / '.$capacity. ' capacity',
+                    'format' => $occupied_percentage . '% Full',
                     'enabled' => true,
+                    'y' => -50,
                     'align' => 'right',
+                    'verticalAlign' => 'top',
+//                    'reserveSpace' => false,
                     'style' => array(
-                        'color' => 'white',
+                        'color' => 'black',
                         'textOutline' => false,
                     )
                 )
             ), array(
                 'enableMouseTracking' => false,
                 'data' => array($occupied_percentage),
-                'borderRadiusBottomLeft' => '4px',
-                'borderRadiusBottomRight' => '4px',
+                'borderRadiusBottomLeft' => '10px',
+                'borderRadiusBottomRight' => '10px',
+                'borderRadiusTopLeft' => '10px',
+                'borderRadiusTopRight' => '10px',
                 'color' => $count_color,
                 'borderWidth' => 0,
                 'pointWidth' => 25,
@@ -155,10 +162,12 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 'dataLabels' => array(
                     'enabled' => true,
                     'inside' => true,
-                    'align' => 'left',
-                    'format' => '{point.y}%',
+                    'y' => -20,
+                    'align' => 'high',
+//                    'format' => '{point.y}% Full',
+                    'format' => $count.' people',
                     'style' => array(
-                        'color' => 'white',
+                        'color' => 'black',
                         'textOutline' => false,
                     )
                 )
