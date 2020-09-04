@@ -71,6 +71,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $greenColor = $chart['#view']->query->options['occuspace_green_color'];
     $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
     $redColor = $chart['#view']->query->options['occuspace_red_color'];
+    $fontSize = $chart['#view']->query->options['occuspace_font_size'];
     $chart_width = $chart['#width'];
     $chart_height = $chart['#height'];
 
@@ -146,7 +147,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     'style' => array(
                         'color' => '#A5A5A5',
                         'textOutline' => false,
-                        'fontSize' => 17
+                        'fontSize' => $fontSize,
                     )
                 )
             ), array(
@@ -172,7 +173,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     'style' => array(
                         'color' => 'black',
                         'textOutline' => false,
-                        'fontSize' => 18
+                        'fontSize' => $fontSize,
                     )
                 )
             )
