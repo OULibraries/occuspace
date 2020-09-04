@@ -106,6 +106,7 @@ class occuspace_plugin_query extends views_plugin_query {
         $options['occuspace_green_color'] = array('default' => '#00B239');
         $options['occuspace_yellow_color'] = array('default' => '#FFC300');
         $options['occuspace_red_color'] = array('default' => '#B20000');
+        $options['occuspace_font_size'] = array('default' => 17);
         return $options;
     }
     //Creating the fields for the query settings in the view GUI
@@ -175,6 +176,12 @@ class occuspace_plugin_query extends views_plugin_query {
             '#type' => 'textfield',
             '#description' => 'The color for the last section of the chart (hex or color name).',
             '#default_value' => $this->options['occuspace_red_color'],
+        );
+        $form['occuspace_font_size'] = array(
+            '#title' => t('Font Size'),
+            '#type' => 'textfield',
+            '#description' => 'Enter the font size (px) of the chart text.',
+            '#default_value' => $this->options['occuspace_font_size'],
         );
     }
 }
