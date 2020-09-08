@@ -107,6 +107,7 @@ class occuspace_plugin_query extends views_plugin_query {
         $options['occuspace_yellow_color'] = array('default' => '#FFC300');
         $options['occuspace_red_color'] = array('default' => '#B20000');
         $options['occuspace_font_size'] = array('default' => 17);
+        $options['occuspace_color_change'] = array('default' => true);
         return $options;
     }
     //Creating the fields for the query settings in the view GUI
@@ -182,6 +183,16 @@ class occuspace_plugin_query extends views_plugin_query {
             '#type' => 'textfield',
             '#description' => 'Enter the font size (px) of the chart text.',
             '#default_value' => $this->options['occuspace_font_size'],
+        );
+        $form['occuspace_color_change'] = array(
+            '#title' => t('Color Changing based on percentage? (Bar only)'),
+            '#type' => 'radios',
+            '#description' => 'For bar charts only, do you want the bar to be green/yellow/red based on percentage of capacity?',
+            '#default_value' => $this->options['occuspace_color_change'],
+            '#options' => array(
+                'true' => t('Yes (Will auto-change color)'),
+                'false' => t('No (Use custom color in settings for entire bar)'),
+            ),
         );
     }
 }

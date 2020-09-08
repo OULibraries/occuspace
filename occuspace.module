@@ -72,6 +72,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
     $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
     $redColor = $chart['#view']->query->options['occuspace_red_color'];
     $fontSize = $chart['#view']->query->options['occuspace_font_size'];
+    $color_change = $chart['#view']->query->options['occuspace_color_change'];
     $chart_width = $chart['#width'];
     $chart_height = $chart['#height'];
 
@@ -116,8 +117,25 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
         );
         $definition['plotOptions']['bar']['pointPadding'] = 0;
 
-        $capacity_color = $chart['#view']->style_options['field_colors']['capacity'];
-        $count_color = $chart['#view']->style_options['field_colors']['count'];
+        if ($color_change === true) { // color changing bar based on capacity percentage.
+            $greenTo = $yellowFrom = $capacity*.75;
+            $yellowTo = $redFrom = $capacity*.9;
+            switch ($count) {
+                case $count > 0 && $count <= $greenTo:
+                    $count_color = $greenColor;
+                break;
+                case $count > $yellowFrom && $count <= $yellowTo:
+                    $count_color = $yellowColor;
+                break;
+                case $count > $redFrom:
+                    $count_color = $redColor;
+                break;
+            }
+            $capacity_color = "#BABABA";
+        } else {
+            $count_color = $chart['#view']->style_options['field_colors']['count'];
+            $capacity_color = $chart['#view']->style_options['field_colors']['capacity'];
+        }
 
         $count_suffix = $count == 1 ? 'Person' : 'People';
 
