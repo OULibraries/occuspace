@@ -107,7 +107,7 @@ class occuspace_plugin_query extends views_plugin_query {
         $options['occuspace_yellow_color'] = array('default' => '#FFC300');
         $options['occuspace_red_color'] = array('default' => '#B20000');
         $options['occuspace_font_size'] = array('default' => 17);
-        $options['occuspace_color_change'] = array('default' => true);
+        $options['occuspace_color_change'] = array('default' => 'true');
         return $options;
     }
     //Creating the fields for the query settings in the view GUI
