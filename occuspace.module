@@ -88,14 +88,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             $percs += $d->percentage;
             $count += $d->count;
             $capacity += $d->capacity;
-//            dsm($count);
-//            dsm($capacity);
         }
-//        $percentage = $percs/$numOfRecords;
-//        //$data[] = array(round($percentage) . '%', $count);
 
-//        $count = 1900;
-//        $capacity = 4000;
         $occupied_percentage = round((intval($count)/intval($capacity)) * 100);
 
         $definition['chart'] = array(
