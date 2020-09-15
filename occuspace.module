@@ -68,64 +68,40 @@ function occuspace_settings() {
  * 2) bar chart
 */
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
-    // Set the variables for the query options. These are from the "Query Settings" option
-    // in the "Other" section a view display.
-    $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
-    $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
-    $data_format_type = $chart['#view']->query->options['occuspace_data_format_type'];
-    $occuspace_slice_text_color = $chart['#view']->query->options['occuspace_slice_text_color'];
-    $occuspace_available_label = $chart['#view']->query->options['occuspace_available_label'];
-    $occuspace_count_label = $chart['#view']->query->options['occuspace_count_label'];
-    $greenColor = $chart['#view']->query->options['occuspace_green_color'];
-    $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
-    $redColor = $chart['#view']->query->options['occuspace_red_color'];
-    $fontSize = $chart['#view']->query->options['occuspace_font_size'];
-    $color_change = $chart['#view']->query->options['occuspace_color_change'];
-
-    // Chart options from the chart format settings in the view display
-    $chart_library = $chart['#chart_library'];
-    $chart_type = $chart['#chart_type'];
-    $chart_width = $chart['#width'];
-    $chart_height = $chart['#height'];
-    
-    // bar chart chosen. Will appear as a horizontal single bar.
-    if ($chart_type == 'bar') { 
-        // Set some defaults. Bar chart will be in 'progress bar' style with
-        // percentage full fulled in so data is in percentage form.
-        $count = 0;
-        $capacity = 0;
-        $percs = 0;
-        $numOfRecords = 0;
-        foreach ($chart['#view']->result as $d) {
-            $numOfRecords++;
-            $percs += $d->percentage;
-            $count += $d->count;
-            $capacity += $d->capacity;
-        }
-        $occupied_percentage = round((intval($count) / intval($capacity)) * 100);
-
-        if ($chart_library == 'highcharts') {
-            // add Highcharts rounded corners script for better appearance.
-            drupal_add_js('https://rawgit.com/highcharts/rounded-corners/master/rounded-corners.js', 'external');
-            
-            // alter Highcharts charts definition to work as intended.
-            $definition['chart'] = [
-                'type' => 'bar',
-                'width' => $chart_width,
-                'height' => 85
-            ];
-            $definition['credits'] = FALSE;
-            $definition['tooltip'] = FALSE;
-            $definition['legend'] = FALSE;
-            $definition['xAxis'] = [
-                'visible' => FALSE
-            ];
-            $definition['yAxis'] = [
-                'visible' => FALSE,
-                'min' => '0',
-                'max' => '100'
-            ];
-            $definition['plotOptions']['bar']['pointPadding'] = 0;
+    if (strpos($chart_id, 'occuspace') !== false) {
+        // Set the variables for the query options. These are from the "Query Settings" option
+        // in the "Other" section a view display.
+        $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
+        $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
+        $data_format_type = $chart['#view']->query->options['occuspace_data_format_type'];
+        $occuspace_slice_text_color = $chart['#view']->query->options['occuspace_slice_text_color'];
+        $occuspace_available_label = $chart['#view']->query->options['occuspace_available_label'];
+        $occuspace_count_label = $chart['#view']->query->options['occuspace_count_label'];
+        $greenColor = $chart['#view']->query->options['occuspace_green_color'];
+        $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
+        $redColor = $chart['#view']->query->options['occuspace_red_color'];
+        $fontSize = $chart['#view']->query->options['occuspace_font_size'];
+        $color_change = $chart['#view']->query->options['occuspace_color_change'];
+        // Chart options from the chart format settings in the view display
+        $chart_library = $chart['#chart_library'];
+        $chart_type = $chart['#chart_type'];
+        $chart_width = $chart['#width'];
+        $chart_height = $chart['#height'];
+        // Overrides for a bar chart. Will appear as a horizontal single bar.
+        if ($chart_type == 'bar') {
+            // Set some defaults. Bar chart will be in 'progress bar' style with
+            // percentage full fulled in so data is in percentage form.
+            $count = 0;
+            $capacity = 0;
+            $percs = 0;
+            $numOfRecords = 0;
+            foreach ($chart['#view']->result as $d) {
+                $numOfRecords++;
+                $percs += $d->percentage;
+                $count += $d->count;
+                $capacity += $d->capacity;
+            }
+            $occupied_percentage = round((intval($count) / intval($capacity)) * 100);
             if ($color_change === 'true') { // color changing bar based on capacity percentage.
                 $greenTo = $yellowFrom = $capacity * .75;
                 $yellowTo = $redFrom = $capacity * .9;
@@ -142,98 +118,157 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 }
                 $capacity_color = "#BABABA";
             }
-            else {
+            else { // no color change, use set style options
                 $count_color = $chart['#view']->style_options['field_colors']['count'];
                 $capacity_color = $chart['#view']->style_options['field_colors']['capacity'];
             }
+            // use correct suffix based on count.
             $count_suffix = $count == 1 ? 'Person' : 'People';
-            $definition['series'] = [
-                [
-                    'data' => [100],
-                    'grouping' => FALSE,
-                    'animation' => FALSE,
-                    'enableMouseTracking' => FALSE,
-                    'showInLegend' => FALSE,
-                    'color' => $capacity_color,
-                    'pointWidth' => 10,
-                    'borderWidth' => 0,
-                    'borderRadiusTopLeft' => '10px',
-                    'borderRadiusTopRight' => '10px',
-                    'borderRadiusBottomLeft' => '11px',
-                    'borderRadiusBottomRight' => '11px',
-                    'dataLabels' => [
-                        'format' => $occupied_percentage . '% Full',
-                        'enabled' => TRUE,
-                        'y' => -50,
-                        'align' => 'right',
-                        'verticalAlign' => 'top',
-                        'style' => [
-                            'color' => '#A5A5A5',
-                            'textOutline' => FALSE,
-                            'fontSize' => $fontSize,
+            // overrides for highcharts
+            if ($chart_library == 'highcharts') {
+                // add Highcharts rounded corners script for better appearance.
+                drupal_add_js('https://rawgit.com/highcharts/rounded-corners/master/rounded-corners.js', 'external');
+                // alter Highcharts charts definition to work as intended.
+                $definition['chart'] = [
+                    'type' => 'bar',
+                    'width' => $chart_width,
+                    'height' => 85
+                ];
+                $definition['credits'] = FALSE;
+                $definition['tooltip'] = FALSE;
+                $definition['legend'] = FALSE;
+                $definition['xAxis'] = [
+                    'visible' => FALSE
+                ];
+                $definition['yAxis'] = [
+                    'visible' => FALSE,
+                    'min' => '0',
+                    'max' => '100'
+                ];
+                $definition['plotOptions']['bar']['pointPadding'] = 0;
+                $definition['series'] = [
+                    [
+                        'data' => [100],
+                        'grouping' => FALSE,
+                        'animation' => FALSE,
+                        'enableMouseTracking' => FALSE,
+                        'showInLegend' => FALSE,
+                        'color' => $capacity_color,
+                        'pointWidth' => 10,
+                        'borderWidth' => 0,
+                        'borderRadiusTopLeft' => '10px',
+                        'borderRadiusTopRight' => '10px',
+                        'borderRadiusBottomLeft' => '11px',
+                        'borderRadiusBottomRight' => '11px',
+                        'dataLabels' => [
+                            'format' => $occupied_percentage . '% Full',
+                            'enabled' => TRUE,
+                            'y' => -50,
+                            'align' => 'right',
+                            'verticalAlign' => 'top',
+                            'style' => [
+                                'color' => '#A5A5A5',
+                                'textOutline' => FALSE,
+                                'fontSize' => $fontSize,
+                            ]
                         ]
-                    ]
-                ],
-                [
-                    'enableMouseTracking' => FALSE,
-                    'data' => [$occupied_percentage],
-                    'borderRadiusBottomLeft' => '10px',
-                    'borderRadiusBottomRight' => '10px',
-                    'borderRadiusTopLeft' => '10px',
-                    'borderRadiusTopRight' => '10px',
-                    'color' => $count_color,
-                    'borderWidth' => 0,
-                    'pointWidth' => 10,
-                    'animation' => [
-                        'duration' => 250,
                     ],
-                    'dataLabels' => [
-                        'enabled' => TRUE,
-                        'inside' => TRUE,
-                        'y' => -20,
-                        'align' => 'high',
-                        'format' => $count . ' ' . $count_suffix,
-                        'style' => [
-                            'color' => 'black',
-                            'textOutline' => FALSE,
-                            'fontSize' => $fontSize,
+                    [
+                        'enableMouseTracking' => FALSE,
+                        'data' => [$occupied_percentage],
+                        'borderRadiusBottomLeft' => '10px',
+                        'borderRadiusBottomRight' => '10px',
+                        'borderRadiusTopLeft' => '10px',
+                        'borderRadiusTopRight' => '10px',
+                        'color' => $count_color,
+                        'borderWidth' => 0,
+                        'pointWidth' => 10,
+                        'animation' => [
+                            'duration' => 250,
+                        ],
+                        'dataLabels' => [
+                            'enabled' => TRUE,
+                            'inside' => TRUE,
+                            'y' => -20,
+                            'align' => 'high',
+                            'format' => $count . ' ' . $count_suffix,
+                            'style' => [
+                                'color' => 'black',
+                                'textOutline' => FALSE,
+                                'fontSize' => $fontSize,
+                            ]
                         ]
                     ]
-                ]
-            ];
-        } else { // google charts bar
-            $definition['options']['legend'] = 'none';
-            $definition['options']['height'] = $chart_height;
-            $definition['options']['isStacked'] = 'percent';
-            $definition['options']['hAxis'] = array(
-                'ticks' => ['0', '.3', '.6', '.9', '1']
-            );
-            $data = array();
-            $data[] = array('Label', 'People', 'Capacity');
-            $data[] = array('People',  $count, $capacity);
+                ];
+            }
+            else { // google charts bar
+                // calculate the left over portion of the capacity. Google bar percentage type needs this value to show the separate sections correctly.
+                $left_over = $capacity - $count;
+                // if over capacity, make it 0 to show as full instead of a negative value.
+                $left_over_use = $left_over < 0 ? 0 : $left_over;
+                // unset some things not needed. keeping these can affect display
+                unset($definition['options']['hAxes']);
+                unset($definition['options']['vAxes']);
+                unset($definition['options']['series']);
+                // set definition options
+                $definition['options']['legend'] = 'none';
+                $definition['options']['height'] = 90;
+                $definition['options']['width'] = $chart_width;
+                $definition['options']['isStacked'] = 'percent';
+                $definition['options']['hAxis'] = [
+                    'ticks' => ['0', '.3', '.6', '.9', '1']
+                ];
+                $definition['options']['series'] = [
+                    '0' => ['color' => $count_color],
+                    '1' => ['color' => $capacity_color]
+                ];
+                $definition['options']['annotations'] = [
+                    'fontSize' => $fontSize
+                ];
+                //set up data for the stacked bar chart.
+                $data = [];
+                $data[] = [
+                    '',
+                    $count_suffix,
+                    ['role' => 'annotation'],
+                    'Capacity',
+                    ['role' => 'annotation'],
+                    ['role' => 'style']
+                ];
+                $data[] = [
+                    '',
+                    $count,
+                    $count . ' ' . $count_suffix,
+                    $left_over_use,
+                    $occupied_percentage . '% Full',
+                    ''
+                ];
+                $definition['data'] = $data;
+            }
         }
-    }
-    if ($chart_type == 'pie') {
-        if (strpos($chart_id, 'occuspace') !== false) {
-            $data = array();
-            $data[] = array('first', 'second');
+        if ($chart_type == 'pie') { // overrides for pie chart type.
+            $data = [];
+            $data[] = ['first', 'second'];
             $count = 0;
             $capacity = 0;
             $percs = 0;
             $numOfRecords = 0;
             $chartChoice = ($chartChoice == 'yesGauge') ? 'Gauge' : 'PieChart';
             foreach ($chart['#view']->result as $d) {
-                $numOfRecords ++;
+                $numOfRecords++;
                 $percs += $d->percentage;
                 $count += $d->count;
                 $capacity += $d->capacity;
             }
-            $percentage = $percs/$numOfRecords;
-            if ($chartChoice == 'PieChart') {
+            $percentage = $percs / $numOfRecords;
+            if ($chartChoice == 'PieChart') { // if half donut style is chosen (not gauge)
                 $available = ($capacity - $count);
-                $data[] = array('', $capacity);
-                $data[] = array($occuspace_count_label . ' ' . $count, $count);
-                $data[] = array($occuspace_available_label . ' ' . $available, $available);
+                $data[] = ['', $capacity];
+                $data[] = [$occuspace_count_label . ' ' . $count, $count];
+                $data[] = [
+                    $occuspace_available_label . ' ' . $available,
+                    $available
+                ];
                 $definition['options']['pieHole'] = $pieHole;
                 $definition['options']['pieStartAngle'] = 90;
                 $definition['options']['slices'][0] = [
@@ -243,53 +278,54 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 $definition['options']['pieSliceTextStyle']['color'] = $occuspace_slice_text_color;
                 $definition['options']['pieSliceTextStyle']['text-anchor'] = 'middle';
                 $definition['options']['pieSliceText'] = 'label';
-                $definition['options']['tooltip']['ignoreBounds'] = true;
-                // here is where we override highcharts.
+                $definition['options']['tooltip']['ignoreBounds'] = TRUE;
+                // highcharts only overrides
                 if ($chart_library == 'highcharts') {
-                    $newData[] = array(
-                        'Occupied' => 350,
-                    );
-                    $newData[] = array(
-                        'Available' => 1000,
-                    );
+                    $newData[] = [
+                        'Occupied' => $count,
+                    ];
+                    $newData[] = [
+                        'Available' => $capacity,
+                    ];
                     $definition['plotOptions']['pie']['startAngle'] = -90;
                     $definition['plotOptions']['pie']['endAngle'] = 90;
-                    $definition['plotOptions']['pie']['allowPointSelect'] = true;
+                    $definition['plotOptions']['pie']['allowPointSelect'] = TRUE;
                     $definition['plotOptions']['pie']['cursor'] = 'pointer';
-                    $definition['plotOptions']['pie']['showInLegend'] = true;
-                    $definition['plotOptions']['pie']['center'] = array(
-                        '50%', '75%',
-                    );
-                    $definition['plotOptions']['pie']['dataLabels'] = array(
+                    $definition['plotOptions']['pie']['showInLegend'] = TRUE;
+                    $definition['plotOptions']['pie']['center'] = [
+                        '50%',
+                        '75%',
+                    ];
+                    $definition['plotOptions']['pie']['dataLabels'] = [
                         'enabled' => 'true',
                         'distance' => -50,
-                        'style' => array(
+                        'style' => [
                             'fontWeight' => 'bold',
                             'color' => 'black',
                             'size' => '20px'
-                        ),
+                        ],
                         'format' => '{point.y:,.0f}'
-                    );
+                    ];
                     $definition['tooltip']['pointFormat'] = '{point.percentage:.1f}%';
                     $definition['plotOptions']['pie']['size'] = '110%';
                     $definition['plotOptions']['series'][0]['dataLabels']['enabled'] = TRUE;
-                    $definition['title'] = array(
+                    $definition['title'] = [
                         'text' => '%<br>Occupied',
                         'align' => 'center',
                         'verticalAlign' => 'middle',
                         'y' => 50,
                         'x' => 0
-                    );
+                    ];
                     $definition['series'][0]['innerSize'] = '50%';
                     $definition['series'][0]['type'] = 'pie';
                     $definition['series'][0]['data'] = $newData;
                 }
             }
-            else {
-                $data[] = array(round($percentage) . '%', $count);
-
-                $greenTo = $yellowFrom = $capacity*.75;
-                $yellowTo = $redFrom = $capacity*.9;
+            else { //overrides for gauge type pie chart
+                // the following options are used by google and highchart libraries.
+                $data[] = [round($percentage) . '%', $count];
+                $greenTo = $yellowFrom = $capacity * .75;
+                $yellowTo = $redFrom = $capacity * .9;
                 $definition['options']['greenColor'] = $greenColor;
                 $definition['options']['yellowColor'] = $yellowColor;
                 $definition['options']['redColor'] = $redColor;
@@ -300,42 +336,41 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 $definition['options']['redFrom'] = $redFrom;
                 $definition['options']['redTo'] = $capacity;
                 $definition['options']['max'] = $capacity;
-                // here is where we override highcharts.
+                // highcharts only overrides for gauge type
                 if ($chart_library == 'highcharts') {
+                    // add js support for gauge
                     drupal_add_js('https://code.highcharts.com/highcharts-more.js', 'external');
+                    //unset some variables not needed.
                     unset($definition['yAxis']);
                     unset($definition['series']);
                     unset($definition['pie']);
                     unset($definition['plotOptions']['pie']);
                     unset($definition['chart']);
-
-                    $occupied_percentage = round((intval($count)/intval($capacity)) * 100);
-
-                    $definition['chart'] = array(
+                    $occupied_percentage = round((intval($count) / intval($capacity)) * 100);
+                    $definition['chart'] = [
                         'type' => 'gauge',
                         'width' => $chart_width,
                         'height' => $chart_height
-                    );
-
-                    $definition['pane'] = array(
+                    ];
+                    $definition['pane'] = [
                         'size' => '100%',
                         'startAngle' => -150,
                         'endAngle' => 150
-                    );
-
+                    ];
+                    // values for format type. Can be set to be measured in number of people or by percentage.
                     $yaxis_suffix = '';
                     if ($data_format_type === 'people') {
                         $greenTo = $yellowFrom = $capacity * .75;
                         $yellowTo = $redFrom = $capacity * .9;
                         $max = $redTo = $capacity;
-                    } else {
+                    }
+                    else {
                         $greenTo = $yellowFrom = 100 * .75;
                         $yellowTo = $redFrom = 100 * .9;
                         $max = $redTo = 100;
                         $yaxis_suffix = ' %';
                     }
-
-                    $definition['yAxis'] = array(
+                    $definition['yAxis'] = [
                         'min' => 0,
                         'max' => $max,
                         'gridLineColor' => 'transparent',
@@ -351,48 +386,46 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         'tickWidth' => 5,
                         'zIndex' => 100,
                         'plotBands' => [
-                            array(
+                            [
                                 'from' => 0,
                                 'to' => $greenTo,
                                 'color' => $greenColor
-                            ),
-                            array(
+                            ],
+                            [
                                 'from' => $yellowFrom,
                                 'to' => $yellowTo,
                                 'color' => $yellowColor
-                            ),
-                            array(
+                            ],
+                            [
                                 'from' => $redFrom,
                                 'to' => $redTo,
                                 'color' => $redColor
-                            )
+                            ]
                         ],
-                        'labels' => array(
-                            'format' => '{value}'.$yaxis_suffix
-                        )
-                    );
-
-                    $definition['plotOptions']['gauge']['dataLabels'] = array(
+                        'labels' => [
+                            'format' => '{value}' . $yaxis_suffix
+                        ]
+                    ];
+                    $definition['plotOptions']['gauge']['dataLabels'] = [
                         'enabled' => 'true',
                         'distance' => -50,
-                        'style' => array(
+                        'style' => [
                             'fontWeight' => 'bold',
                             'color' => 'black',
                             'size' => '20px'
-                        ),
+                        ],
                         'format' => '{point.y:,.0f}'
-                    );
-
-                    $definition['tooltip']['pointFormat'] = round($percentage).'% Occupied';
-                    $definition['series'][0]['data'] = $data_format_type === 'people' ? array($count) : array($occupied_percentage);
-                    $definition['series'][0]['dataLabels'] = array(
-                        'enabled' => true,
-                        'style' => array(
+                    ];
+                    $definition['tooltip']['pointFormat'] = round($percentage) . '% Occupied';
+                    $definition['series'][0]['data'] = $data_format_type === 'people' ? [$count] : [$occupied_percentage];
+                    $definition['series'][0]['dataLabels'] = [
+                        'enabled' => TRUE,
+                        'style' => [
                             'fontWeight' => 'bold',
                             'fontSize' => '20px'
-                        ),
-                        'format' => '{y} '.$occuspace_count_label
-                    );
+                        ],
+                        'format' => '{y} ' . $occuspace_count_label
+                    ];
                     $definition['options']['lang']['thousandsSep'] = ',';
                 }
             }
