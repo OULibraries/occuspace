@@ -412,11 +412,22 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     unset($definition['plotOptions']['pie']);
                     unset($definition['chart']);
                     $occupied_percentage = round((intval($count) / intval($capacity)) * 100);
+
                     $definition['chart'] = [
                         'type' => 'gauge',
                         'width' => $chart_width,
                         'height' => $chart_height
                     ];
+
+                    $chart_title_use = empty($chart_title) || empty($chart_title_position) ? '' : $chart_title;
+
+                    $definition['title'] = array(
+                        'align' => 'center',
+                        'verticalAlign' => 'middle',
+                        'text' => $chart_title_use,
+                        'y' => 100
+                    );
+
                     $definition['pane'] = [
                         'size' => '100%',
                         'startAngle' => -150,

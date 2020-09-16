@@ -171,27 +171,6 @@ class occuspace_plugin_query extends views_plugin_query {
             '#default_value' => $this->options['occuspace_slice_text_color'],
         );
 
-        $form['occuspace_green_color'] = array(
-            '#title' => t('Gauge - first section color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the first section of the chart (hex or color name). Default is green. *Gauge type only',
-            '#default_value' => $this->options['occuspace_green_color'],
-        );
-
-        $form['occuspace_yellow_color'] = array(
-            '#title' => t('Gauge - second section color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the second section of the chart (hex or color name). Default is yellow. *Gauge type only',
-            '#default_value' => $this->options['occuspace_yellow_color'],
-        );
-
-        $form['occuspace_red_color'] = array(
-            '#title' => t('Gauge - last section color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the last section of the chart (hex or color name). Default is red. *Gauge type only',
-            '#default_value' => $this->options['occuspace_red_color'],
-        );
-
         $form['occuspace_color_change'] = array(
             '#title' => t('Pie donut and Bar - Color Changing based on percentage?'),
             '#type' => 'radios',
@@ -201,6 +180,27 @@ class occuspace_plugin_query extends views_plugin_query {
                 'true' => t('Yes, auto-change color)'),
                 'false' => t('No, set to custom color in field settings)'),
             ),
+        );
+
+        $form['occuspace_green_color'] = array(
+            '#title' => t('First section color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the first section of the chart (hex or color name). Default is green.',
+            '#default_value' => $this->options['occuspace_green_color'],
+        );
+
+        $form['occuspace_yellow_color'] = array(
+            '#title' => t('Second section color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the second section of the chart (hex or color name). Default is yellow.',
+            '#default_value' => $this->options['occuspace_yellow_color'],
+        );
+
+        $form['occuspace_red_color'] = array(
+            '#title' => t('Last section color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the last section of the chart (hex or color name). Default is red.',
+            '#default_value' => $this->options['occuspace_red_color'],
         );
     }
 }
