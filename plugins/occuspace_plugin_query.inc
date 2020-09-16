@@ -120,7 +120,7 @@ class occuspace_plugin_query extends views_plugin_query {
             '#default_value' => $this->options['occuspace_data_format_type'],
             '#options' => array(
                 'people' => t('Number of people'),
-                'percentage' => t('Percentage of Occupancy'),
+                'percentage' => t('Percentage of Capacity'),
             ),
         );
 
@@ -129,6 +129,13 @@ class occuspace_plugin_query extends views_plugin_query {
             '#type' => 'textfield',
             '#description' => 'The label for the chart indicating the number of people that can still enter the zone.',
             '#default_value' => $this->options['occuspace_available_label'],
+        );
+
+        $form['occuspace_count_label'] = array(
+            '#title' => t('Count label'),
+            '#type' => 'textfield',
+            '#description' => 'The label for the chart indicating the number of people that are in the zone.',
+            '#default_value' => $this->options['occuspace_count_label'],
         );
 
         $form['occuspace_font_size'] = array(
@@ -186,13 +193,13 @@ class occuspace_plugin_query extends views_plugin_query {
         );
 
         $form['occuspace_color_change'] = array(
-            '#title' => t('Bar - Color Changing based on percentage?'),
+            '#title' => t('Pie donut and Bar - Color Changing based on percentage?'),
             '#type' => 'radios',
-            '#description' => 'Do you want the bar to be green/yellow/red based on percentage of capacity? *Bar type only',
+            '#description' => 'Do you want the slice or bar to be green/yellow/red based on percentage of capacity? *Bar and pie donut type only',
             '#default_value' => $this->options['occuspace_color_change'],
             '#options' => array(
-                'true' => t('Yes, bar will auto-change color)'),
-                'false' => t('No, bar will be set to custom color in field settings for entire bar)'),
+                'true' => t('Yes, auto-change color)'),
+                'false' => t('No, set to custom color in field settings)'),
             ),
         );
     }

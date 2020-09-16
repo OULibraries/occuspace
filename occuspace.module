@@ -68,25 +68,35 @@ function occuspace_settings() {
  * 2) bar chart
 */
 function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
-    if (strpos($chart_id, 'occuspace') !== false) {
+    if (strpos($chart_id, 'occuspace') !== false) { // only alter if chart contains the name "occuspace"
         // Set the variables for the query options. These are from the "Query Settings" option
         // in the "Other" section a view display.
+        $data_format_type = $chart['#view']->query->options['occuspace_data_format_type'];
+        $occuspace_available_label = $chart['#view']->query->options['occuspace_available_label'];
+        $fontSize = $chart['#view']->query->options['occuspace_font_size'];
         $chartChoice = $chart['#view']->query->options['occuspace_chart_choice'];
         $pieHole = $chart['#view']->query->options['occuspace_pieHole'];
-        $data_format_type = $chart['#view']->query->options['occuspace_data_format_type'];
         $occuspace_slice_text_color = $chart['#view']->query->options['occuspace_slice_text_color'];
-        $occuspace_available_label = $chart['#view']->query->options['occuspace_available_label'];
         $occuspace_count_label = $chart['#view']->query->options['occuspace_count_label'];
         $greenColor = $chart['#view']->query->options['occuspace_green_color'];
         $yellowColor = $chart['#view']->query->options['occuspace_yellow_color'];
         $redColor = $chart['#view']->query->options['occuspace_red_color'];
-        $fontSize = $chart['#view']->query->options['occuspace_font_size'];
         $color_change = $chart['#view']->query->options['occuspace_color_change'];
-        // Chart options from the chart format settings in the view display
-        $chart_library = $chart['#chart_library'];
+
+        // Chart options from the "display" section of the format settings in the view display
         $chart_type = $chart['#chart_type'];
+        $chart_library = $chart['#chart_library'];
+        $chart_title = $chart['#title'];
+        $chart_title_position = $chart['#title_position'];
+        $show_tooltip = $chart['#tooltips'];
+        $show_data_labels = $chart['#data_labels'];
+        $chart_colors = $chart['#colors'];
+        $chart_background_color = $chart['#background'];
+        $chart_legend_position = $chart['#legend_position'];
         $chart_width = $chart['#width'];
         $chart_height = $chart['#height'];
+        $chart_view_data = $chart['#view'];
+
         // Overrides for a bar chart. Will appear as a horizontal single bar.
         if ($chart_type == 'bar') {
             // Set some defaults. Bar chart will be in 'progress bar' style with
@@ -95,7 +105,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             $capacity = 0;
             $percs = 0;
             $numOfRecords = 0;
-            foreach ($chart['#view']->result as $d) {
+            foreach ($chart_view_data->result as $d) {
                 $numOfRecords++;
                 $percs += $d->percentage;
                 $count += $d->count;
@@ -119,8 +129,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 $capacity_color = "#BABABA";
             }
             else { // no color change, use set style options
-                $count_color = $chart['#view']->style_options['field_colors']['count'];
-                $capacity_color = $chart['#view']->style_options['field_colors']['capacity'];
+                $count_color = $chart_data->style_options['field_colors']['count'];
+                $capacity_color = $chart_data->style_options['field_colors']['capacity'];
             }
             // use correct suffix based on count.
             $count_suffix = $count == 1 ? 'Person' : 'People';
@@ -247,29 +257,52 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             }
         }
         if ($chart_type == 'pie') { // overrides for pie chart type.
-            $data = [];
-            $data[] = ['first', 'second'];
+            $data = array();
+            $data[] = array('first', 'second');
             $count = 0;
             $capacity = 0;
             $percs = 0;
             $numOfRecords = 0;
             $chartChoice = ($chartChoice == 'yesGauge') ? 'Gauge' : 'PieChart';
-            foreach ($chart['#view']->result as $d) {
+            foreach ($chart_view_data->result as $d) {
                 $numOfRecords++;
                 $percs += $d->percentage;
                 $count += $d->count;
                 $capacity += $d->capacity;
             }
             $percentage = $percs / $numOfRecords;
-            if ($chartChoice == 'PieChart') { // if half donut style is chosen (not gauge)
+
+            // if half donut style is chosen (not gauge)
+            if ($chartChoice == 'PieChart') {
                 $available = ($capacity - $count);
-                $data[] = ['', $capacity];
-                $data[] = [$occuspace_count_label . ' ' . $count, $count];
-                $data[] = [
-                    $occuspace_available_label . ' ' . $available,
-                    $available
-                ];
-                $definition['options']['pieHole'] = $pieHole;
+                $data[] = array('', $capacity);
+                $data[] = array($occuspace_count_label, $count);
+                $data[] = array($occuspace_available_label, $available);
+                // if pie hole value is larger than 1, set to 1.
+                $pie_hole = floatval($pieHole) > 1 ? 1 : floatval($pieHole);
+                $pie_inner_size_calc = ($pie_hole*100).'%';
+
+                if ($color_change === 'true') { // color changing bar based on capacity percentage.
+                    $greenTo = $yellowFrom = $capacity * .75;
+                    $yellowTo = $redFrom = $capacity * .9;
+                    switch ($count) {
+                        case $count > 0 && $count <= $greenTo:
+                            $count_color = $greenColor;
+                            break;
+                        case $count > $yellowFrom && $count <= $yellowTo:
+                            $count_color = $yellowColor;
+                            break;
+                        case $count > $redFrom:
+                            $count_color = $redColor;
+                            break;
+                    }
+                    $capacity_color = "#BABABA";
+                } else { // no color change, use set style options
+                    $count_color = $chart_colors[0];
+                    $capacity_color = $chart_colors[1];
+                }
+
+                $definition['options']['pieHole'] = $pie_hole;
                 $definition['options']['pieStartAngle'] = 90;
                 $definition['options']['slices'][0] = [
                     'color' => 'transparent',
@@ -277,46 +310,78 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 ];
                 $definition['options']['pieSliceTextStyle']['color'] = $occuspace_slice_text_color;
                 $definition['options']['pieSliceTextStyle']['text-anchor'] = 'middle';
-                $definition['options']['pieSliceText'] = 'label';
-                $definition['options']['tooltip']['ignoreBounds'] = TRUE;
+                $definition['options']['innerSize'] = $pie_inner_size_calc;
+                $definition['options']['pieSliceText'] = 'percentage';
+                $definition['options']['animation']['startup'] = TRUE;
+                $definition['options']['animation']['duration'] = 10000;
+                $definition['options']['animation']['easing'] = 'inAndOut';
+
                 // highcharts only overrides
                 if ($chart_library == 'highcharts') {
-                    $newData[] = [
-                        'Occupied' => $count,
-                    ];
-                    $newData[] = [
-                        'Available' => $capacity,
-                    ];
+                    $newData[] = array(
+                        'name' => $occuspace_count_label,
+                        'y' => $count,
+                        'color' => $count_color
+                    );
+                    $newData[] = array(
+                        'name' => $occuspace_available_label,
+                        'y' => $available,
+                        'color' => $capacity_color
+                    );
+                    $definition['legend']['enabled'] = empty($chart_legend_position) ? false : true;
                     $definition['plotOptions']['pie']['startAngle'] = -90;
                     $definition['plotOptions']['pie']['endAngle'] = 90;
-                    $definition['plotOptions']['pie']['allowPointSelect'] = TRUE;
-                    $definition['plotOptions']['pie']['cursor'] = 'pointer';
-                    $definition['plotOptions']['pie']['showInLegend'] = TRUE;
-                    $definition['plotOptions']['pie']['center'] = [
-                        '50%',
-                        '75%',
-                    ];
-                    $definition['plotOptions']['pie']['dataLabels'] = [
-                        'enabled' => 'true',
+                    $definition['plotOptions']['pie']['center'] = array(
+                        '50%', '75%',
+                    );
+                    $definition['plotOptions']['pie']['dataLabels'] = array(
+                        'padding' => 0,
+                        'enabled' => $show_data_labels,
                         'distance' => -50,
-                        'style' => [
+                        'style' => array(
                             'fontWeight' => 'bold',
-                            'color' => 'black',
-                            'size' => '20px'
-                        ],
-                        'format' => '{point.y:,.0f}'
-                    ];
-                    $definition['tooltip']['pointFormat'] = '{point.percentage:.1f}%';
-                    $definition['plotOptions']['pie']['size'] = '110%';
-                    $definition['plotOptions']['series'][0]['dataLabels']['enabled'] = TRUE;
-                    $definition['title'] = [
-                        'text' => '%<br>Occupied',
+                            'color' => $occuspace_slice_text_color,
+                            'textShadow' => '0px 1px 2px black',
+                            'fontSize' => $fontSize
+                        )
+                    );
+
+                    // defaults for title of pie chart (centered inside pie)
+                    $definition['title'] = array(
                         'align' => 'center',
                         'verticalAlign' => 'middle',
-                        'y' => 50,
-                        'x' => 0
-                    ];
-                    $definition['series'][0]['innerSize'] = '50%';
+                        'y' => 50
+                    );
+
+                    // title moves around a bit when legend is added. So adjust based on legend position.
+                    switch (true) {
+                        case $chart_legend_position === 'right':
+                            $definition['title']['x'] = -50;
+                            break;
+                        case $chart_legend_position === 'left':
+                            $definition['title']['x'] = 50;
+                            break;
+                        case $chart_legend_position === 'top':
+                            $definition['title']['y'] = 70;
+                            break;
+                        case $chart_legend_position === 'bottom':
+                            $definition['title']['y'] = 30;
+                            break;
+                    }
+
+                    if ($data_format_type === 'percentage') {
+                        $definition['plotOptions']['pie']['dataLabels']['format'] = '{point.percentage:.1f} %';
+                        $definition['title']['text'] = '% Full';
+                        //$definition['tooltip']['pointFormat'] = '% of Capacity: <b>{point.percentage:.1f}%</b>';
+                    } else {
+                        $definition['plotOptions']['pie']['dataLabels']['format'] = '{y}';
+                        $definition['title']['text'] = '# of<br>'.$occuspace_available_label;
+                        //$definition['tooltip']['pointFormat'] = 'Number of People: <b>{point.percentage:.1f}%</b>';
+                    }
+
+                    $definition['plotOptions']['pie']['size'] = '110%';
+                    $definition['plotOptions']['series'][0]['dataLabels']['enabled'] = TRUE;
+                    $definition['series'][0]['innerSize'] = $pie_inner_size_calc;
                     $definition['series'][0]['type'] = 'pie';
                     $definition['series'][0]['data'] = $newData;
                 }
