@@ -113,17 +113,6 @@ class occuspace_plugin_query extends views_plugin_query {
     //Creating the fields for the query settings in the view GUI
     function options_form(&$form, &$form_state) {
         parent::options_form($form, $form_state);
-        $form['occuspace_chart_choice'] = array(
-            '#title' => t('Gauge?'),
-            '#type' => 'radios',
-            '#description' => 'Would you like to be really cool and make this a Gauge chart type?',
-            '#default_value' => $this->options['occuspace_chart_choice'],
-            '#options' => array(
-                'yesGauge' => t('Yes Gauge!'),
-                'noGauge' => t('No Gauge.'),
-            ),
-        );
-
         $form['occuspace_data_format_type'] = array(
             '#title' => t('Data Format'),
             '#type' => 'radios',
@@ -131,68 +120,87 @@ class occuspace_plugin_query extends views_plugin_query {
             '#default_value' => $this->options['occuspace_data_format_type'],
             '#options' => array(
                 'people' => t('Number of people'),
-                'percentage' => t('Percentage of Occupancy'),
+                'percentage' => t('Percentage of Capacity'),
             ),
         );
 
-        $form['occuspace_pieHole'] = array(
-            '#title' => t('Pie Hole'),
-            '#type' => 'textfield',
-            '#description' => 'The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0.',
-            '#default_value' => $this->options['occuspace_pieHole'],
-            '#size' => 3,
-        );
-        $form['occuspace_slice_text_color'] = array(
-            '#title' => t('Slice Text Color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the text on the pie slices (hex or color name).',
-            '#default_value' => $this->options['occuspace_slice_text_color'],
-        );
         $form['occuspace_available_label'] = array(
             '#title' => t('Available label'),
             '#type' => 'textfield',
             '#description' => 'The label for the chart indicating the number of people that can still enter the zone.',
             '#default_value' => $this->options['occuspace_available_label'],
         );
+
         $form['occuspace_count_label'] = array(
             '#title' => t('Count label'),
             '#type' => 'textfield',
-            '#description' => 'The label for the chart indicating the number of people occupying a zone.',
+            '#description' => 'The label for the chart indicating the number of people that are in the zone.',
             '#default_value' => $this->options['occuspace_count_label'],
         );
-        $form['occuspace_green_color'] = array(
-            '#title' => t('Green (First) Color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the first section of the chart (hex or color name).',
-            '#default_value' => $this->options['occuspace_green_color'],
-        );
-        $form['occuspace_yellow_color'] = array(
-            '#title' => t('Yellow (Second) Color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the second section of the chart (hex or color name).',
-            '#default_value' => $this->options['occuspace_yellow_color'],
-        );
-        $form['occuspace_red_color'] = array(
-            '#title' => t('Red (Last) Color'),
-            '#type' => 'textfield',
-            '#description' => 'The color for the last section of the chart (hex or color name).',
-            '#default_value' => $this->options['occuspace_red_color'],
-        );
+
         $form['occuspace_font_size'] = array(
             '#title' => t('Font Size'),
             '#type' => 'textfield',
             '#description' => 'Enter the font size (px) of the chart text.',
             '#default_value' => $this->options['occuspace_font_size'],
         );
-        $form['occuspace_color_change'] = array(
-            '#title' => t('Color Changing based on percentage? (Bar only)'),
+
+        $form['occuspace_chart_choice'] = array(
+            '#title' => t('Pie - Chart style'),
             '#type' => 'radios',
-            '#description' => 'For bar charts only, do you want the bar to be green/yellow/red based on percentage of capacity?',
+            '#description' => 'Choose between a speedometer type gauge pie chart or a half donut type pie chart. *Pie chart only',
+            '#default_value' => $this->options['occuspace_chart_choice'],
+            '#options' => array(
+                'yesGauge' => t('Speedomoter/Gauge'),
+                'noGauge' => t('Half Donut'),
+            ),
+        );
+
+        $form['occuspace_pieHole'] = array(
+            '#title' => t('Pie - Pie Hole'),
+            '#type' => 'textfield',
+            '#description' => 'The blank space in the middle of the pie chart. Enter a number between 0 and 1. To shut your piehole, enter 0. *Pie chart only',
+            '#default_value' => $this->options['occuspace_pieHole'],
+            '#size' => 3,
+        );
+
+        $form['occuspace_slice_text_color'] = array(
+            '#title' => t('Pie - Slice Text Color'),
+            '#type' => 'textfield',
+            '#description' => 'The color (hex or color name) for the text on the pie slices. *Pie chart only',
+            '#default_value' => $this->options['occuspace_slice_text_color'],
+        );
+
+        $form['occuspace_color_change'] = array(
+            '#title' => t('Pie donut and Bar - Color Changing based on percentage?'),
+            '#type' => 'radios',
+            '#description' => 'Do you want the slice or bar to be green/yellow/red based on percentage of capacity? *Bar and pie donut type only',
             '#default_value' => $this->options['occuspace_color_change'],
             '#options' => array(
-                'true' => t('Yes (Will auto-change color)'),
-                'false' => t('No (Use custom color in settings for entire bar)'),
+                'true' => t('Yes, auto-change color)'),
+                'false' => t('No, set to custom color in field settings)'),
             ),
+        );
+
+        $form['occuspace_green_color'] = array(
+            '#title' => t('First section color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the first section of the chart (hex or color name). Default is green.',
+            '#default_value' => $this->options['occuspace_green_color'],
+        );
+
+        $form['occuspace_yellow_color'] = array(
+            '#title' => t('Second section color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the second section of the chart (hex or color name). Default is yellow.',
+            '#default_value' => $this->options['occuspace_yellow_color'],
+        );
+
+        $form['occuspace_red_color'] = array(
+            '#title' => t('Last section color'),
+            '#type' => 'textfield',
+            '#description' => 'The color for the last section of the chart (hex or color name). Default is red.',
+            '#default_value' => $this->options['occuspace_red_color'],
         );
     }
 }
