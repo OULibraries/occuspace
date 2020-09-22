@@ -139,7 +139,13 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             if ($chart_library == 'highcharts') {
                 // add Highcharts rounded corners script for better appearance.
                 drupal_add_js('https://rawgit.com/highcharts/rounded-corners/master/rounded-corners.js', 'external');
-                $chart_height = empty($chart_title_position) || $chart_title_position == 'none' ? 80 : 120;
+                // default chart height for a bar with no title
+                $chart_height = 80;
+
+                // if title is set and position is not set to 'none' then, alter chart height to accommodate the title.
+                if (!empty($chart_title) && !empty($chart_title_position)) {
+                    $chart_height = 120;
+                }
 
                 // alter Highcharts charts definition to work as intended.
                 $definition['chart'] = [
@@ -249,7 +255,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $definition['options']['height'] = $chart_height < 50 ? 50 : $chart_height;
                 }
 
-                if ($chart_title_position == 'outside') {
+                if ($chart_title_position == 'outside' && $chart_title != '') {
                     $definition['options']['title'] = $chart_title;
                 } else {
                     $definition['options']['title'] = '';
@@ -441,14 +447,16 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         $definition['options']['tooltip']['trigger'] = 'none';
                     }
 
-                    if (empty($chart_title_position) || $chart_title_position == 'none') {
+                    if (empty($chart_title_position)) {
                         $definition['options']['titlePosition'] = 'none';
+                    } else {
+                        if (!empty($chart_title)) {
+                            $definition['options']['title'] = $chart_title;
+                        }
                     }
 
-                    if (empty($chart_legend_position) || $chart_legend_position == 'none') {
+                    if (empty($chart_legend_position)) {
                         $definition['options']['legend']['position'] = 'none';
-                    } else {
-                        $definition['options']['title'] = $chart_title;
                     }
                     $definition['options']['tooltip']['text'] = 'value';
                     $definition['options']['fontSize'] = $fontSize;
@@ -481,7 +489,10 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         'height' => $chart_height
                     ];
 
-                    $chart_title_use = empty($chart_title) || empty($chart_title_position) ? '' : $chart_title;
+                    $chart_title_use = '';
+                    if (!empty($chart_title) && !empty($chart_title_position)) {
+                        $chart_title_use = $chart_title;
+                    }
 
                     $definition['title'] = array(
                         'align' => 'center',
@@ -582,9 +593,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                         $definition['options']['height'] = $chart_height;
                     }
 
-                    if (empty($chart_title_position) || $chart_title_position == 'none') {
-                        $definition['options']['title'] = '';
-                    } else {
+                    $definition['options']['title'] = '';
+                    if (!empty($chart_title_position) && !empty($chart_title)) {
                         $definition['options']['title'] = $chart_title;
                     }
 
