@@ -111,6 +111,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 $count += $d->count;
                 $capacity += $d->capacity;
             }
+
             $occupied_percentage = round((intval($count) / intval($capacity)) * 100);
             if ($color_change === 'true') { // color changing bar based on capacity percentage.
                 $greenTo = $yellowFrom = $capacity * .75;
@@ -138,11 +139,13 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
             if ($chart_library == 'highcharts') {
                 // add Highcharts rounded corners script for better appearance.
                 drupal_add_js('https://rawgit.com/highcharts/rounded-corners/master/rounded-corners.js', 'external');
+                $chart_height = empty($chart_title_position) || $chart_title_position == 'none' ? 80 : 120;
+
                 // alter Highcharts charts definition to work as intended.
                 $definition['chart'] = [
                     'type' => 'bar',
                     'width' => $chart_width,
-                    'height' => 85
+                    'height' => $chart_height
                 ];
                 $definition['credits'] = FALSE;
                 $definition['tooltip'] = FALSE;
@@ -186,6 +189,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     [
                         'enableMouseTracking' => FALSE,
                         'data' => [$occupied_percentage],
+                        'animation' => FALSE,
                         'borderRadiusBottomLeft' => '10px',
                         'borderRadiusBottomRight' => '10px',
                         'borderRadiusTopLeft' => '10px',
@@ -201,7 +205,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                             'inside' => TRUE,
                             'y' => -20,
                             'align' => 'high',
-                            'format' => $count . ' ' . $count_suffix,
+                            'format' => ceil($count) . ' ' . $count_suffix,
                             'style' => [
                                 'color' => 'black',
                                 'textOutline' => FALSE,
@@ -215,7 +219,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 // calculate the left over portion of the capacity. Google bar percentage type needs this value to show the separate sections correctly.
                 $left_over = $capacity - $count;
                 // if over capacity, make it 0 to show as full instead of a negative value.
-                $left_over_use = $left_over < 0 ? 0 : $left_over;
+                $left_over_use = $left_over < 0 ? 0 : ceil($left_over);
                 // unset some things not needed. keeping these can affect display
                 unset($definition['options']['hAxes']);
                 unset($definition['options']['vAxes']);
@@ -228,13 +232,33 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 $definition['options']['hAxis'] = [
                     'ticks' => ['0', '.3', '.6', '.9', '1']
                 ];
+
                 $definition['options']['series'] = [
                     '0' => ['color' => $count_color],
                     '1' => ['color' => $capacity_color]
                 ];
+
                 $definition['options']['annotations'] = [
                     'fontSize' => $fontSize
                 ];
+
+                if (!empty($chart_width)) {
+                    $definition['options']['width'] = $chart_width;
+                }
+                if (!empty($chart_height)) {
+                    $definition['options']['height'] = $chart_height < 50 ? 50 : $chart_height;
+                }
+
+                if ($chart_title_position == 'outside') {
+                    $definition['options']['title'] = $chart_title;
+                } else {
+                    $definition['options']['title'] = '';
+                    $definition['options']['height'] = 50;
+                }
+
+                $definition['options']['animation']['startup'] = FALSE;
+                $definition['options']['animation']['duration'] = 0;
+                $definition['options']['animation']['easing'] = 'linear';
                 //set up data for the stacked bar chart.
                 $data = [];
                 $data[] = [
@@ -247,8 +271,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 ];
                 $data[] = [
                     '',
-                    $count,
-                    $count . ' ' . $count_suffix,
+                    ceil($count),
+                    ceil($count) . ' ' . $count_suffix,
                     $left_over_use,
                     $occupied_percentage . '% Full',
                     ''
@@ -325,12 +349,12 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                 if ($chart_library == 'highcharts') {
                     $newData[] = array(
                         'name' => $occuspace_count_label,
-                        'y' => $count,
+                        'y' => ceil($count),
                         'color' => $count_color
                     );
                     $newData[] = array(
                         'name' => $occuspace_available_label,
-                        'y' => $available,
+                        'y' => ceil($available),
                         'color' => $capacity_color
                     );
                     $definition['legend']['enabled'] = empty($chart_legend_position) ? false : true;
@@ -376,12 +400,10 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 
                     if ($data_format_type === 'percentage') {
                         $definition['plotOptions']['pie']['dataLabels']['format'] = '{point.percentage:.1f} %';
-                        $definition['title']['text'] = '% Full';
-                        //$definition['tooltip']['pointFormat'] = '% of Capacity: <b>{point.percentage:.1f}%</b>';
+                        $definition['title']['text'] = empty($chart_title) ? '% Full' : $chart_title;
                     } else {
                         $definition['plotOptions']['pie']['dataLabels']['format'] = '{y}';
-                        $definition['title']['text'] = '# of<br>'.$occuspace_available_label;
-                        //$definition['tooltip']['pointFormat'] = 'Number of People: <b>{point.percentage:.1f}%</b>';
+                        $definition['title']['text'] = empty($chart_title) ? '# of<br>'.$occuspace_available_label : $chart_title;
                     }
 
                     $definition['plotOptions']['pie']['size'] = '110%';
@@ -397,8 +419,8 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $data[] = ['first', 'second', ['role'=>'tooltip']];
                     if ($data_format_type === 'people') {
                         $data[] = array('', $capacity, '');
-                        $data[] = array($occuspace_count_label, $count, $count.' '.$occuspace_count_label);
-                        $data[] = array($occuspace_available_label, $available, $available.' '.$occuspace_available_label);
+                        $data[] = array($occuspace_count_label, ceil($count), ceil($count).' '.$occuspace_count_label);
+                        $data[] = array($occuspace_available_label, ceil($available), ceil($available).' '.$occuspace_available_label);
                     } else {
                         $occupied_percentage_text = $occupied_percentage.'%';
                         $available_percentage_text = $available_percentage.'%';
@@ -410,18 +432,23 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     if (!empty($chart_width)) {
                         $definition['options']['width'] = $chart_width;
                     }
+
                     if (!empty($chart_height)) {
                         $definition['options']['height'] = $chart_height;
-                        $definition['options']['height'] = $chart_height;
                     }
+
                     if (empty($show_tooltip)) {
                         $definition['options']['tooltip']['trigger'] = 'none';
                     }
+
                     if (empty($chart_title_position) || $chart_title_position == 'none') {
                         $definition['options']['titlePosition'] = 'none';
                     }
+
                     if (empty($chart_legend_position) || $chart_legend_position == 'none') {
                         $definition['options']['legend']['position'] = 'none';
+                    } else {
+                        $definition['options']['title'] = $chart_title;
                     }
                     $definition['options']['tooltip']['text'] = 'value';
                     $definition['options']['fontSize'] = $fontSize;
@@ -529,7 +556,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     ];
                     $definition['tooltip']['pointFormat'] = $data_format_type === 'people' ? round($percentage) . '% Full' : $count . ' ' . $occuspace_count_label;
                     $definition['tooltip']['enabled'] = empty($definition['tooltip']) ? false : true;
-                    $definition['series'][0]['data'] = $data_format_type === 'people' ? [$count] : [$occupied_percentage];
+                    $definition['series'][0]['data'] = $data_format_type === 'people' ? [ceil($count)] : [$occupied_percentage];
                     $definition['series'][0]['dataLabels'] = [
                         'enabled' => TRUE,
                         'style' => [
@@ -546,7 +573,7 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     $greenTo = $yellowFrom = $gauge_limit * .75;
                     $yellowTo = $redFrom = $gauge_limit * .9;
                     $max = $redTo = $gauge_limit;
-                    $data[] = $data_format_type === 'people' ? [$occuspace_count_label, $count] : ['% Full', round($percentage)];
+                    $data[] = $data_format_type === 'people' ? [$occuspace_count_label, ceil($count)] : ['% Full', round($percentage)];
 
                     if (!empty($chart_width)) {
                         $definition['options']['width'] = $chart_width;
@@ -554,6 +581,13 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     if (!empty($chart_height)) {
                         $definition['options']['height'] = $chart_height;
                     }
+
+                    if (empty($chart_title_position) || $chart_title_position == 'none') {
+                        $definition['options']['title'] = '';
+                    } else {
+                        $definition['options']['title'] = $chart_title;
+                    }
+
                     $definition['options']['fontSize'] = $fontSize;
                     $definition['options']['greenColor'] = $greenColor;
                     $definition['options']['yellowColor'] = $yellowColor;
