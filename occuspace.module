@@ -400,12 +400,10 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
 
                     if ($data_format_type === 'percentage') {
                         $definition['plotOptions']['pie']['dataLabels']['format'] = '{point.percentage:.1f} %';
-                        $definition['title']['text'] = '% Full';
-                        //$definition['tooltip']['pointFormat'] = '% of Capacity: <b>{point.percentage:.1f}%</b>';
+                        $definition['title']['text'] = empty($chart_title) ? '% Full' : $chart_title;
                     } else {
                         $definition['plotOptions']['pie']['dataLabels']['format'] = '{y}';
-                        $definition['title']['text'] = '# of<br>'.$occuspace_available_label;
-                        //$definition['tooltip']['pointFormat'] = 'Number of People: <b>{point.percentage:.1f}%</b>';
+                        $definition['title']['text'] = empty($chart_title) ? '# of<br>'.$occuspace_available_label : $chart_title;
                     }
 
                     $definition['plotOptions']['pie']['size'] = '110%';
@@ -434,17 +432,23 @@ function occuspace_chart_definition_alter(&$definition, $chart, $chart_id) {
                     if (!empty($chart_width)) {
                         $definition['options']['width'] = $chart_width;
                     }
+
                     if (!empty($chart_height)) {
                         $definition['options']['height'] = $chart_height;
                     }
+
                     if (empty($show_tooltip)) {
                         $definition['options']['tooltip']['trigger'] = 'none';
                     }
+
                     if (empty($chart_title_position) || $chart_title_position == 'none') {
                         $definition['options']['titlePosition'] = 'none';
                     }
+
                     if (empty($chart_legend_position) || $chart_legend_position == 'none') {
                         $definition['options']['legend']['position'] = 'none';
+                    } else {
+                        $definition['options']['title'] = $chart_title;
                     }
                     $definition['options']['tooltip']['text'] = 'value';
                     $definition['options']['fontSize'] = $fontSize;
