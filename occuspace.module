@@ -58,6 +58,33 @@ function occuspace_settings() {
     '#description' => t("The authorization ID for Occuspace"),
     '#required' => TRUE,
   );
+  $form['occuspace_use_cookie'] = array(
+    '#type' => 'radios',
+    '#title' => t('Save spaces in cookies?'),
+    '#description' => t("Saves the spaces data in a browser cookie to eliminate excessive API calls. Can be reset by increasing the cache version number shown below when active."),
+    '#required' => TRUE,
+    '#default_value' => variable_get('occuspace_use_cookie', ""),
+    '#options' => [
+      'true' => t('Cookies ON'),
+      'false' => t('Cookies OFF'),
+    ]
+  );
+  $form['occuspace_cookie_version'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('occuspace_cookie_version', ""),
+    '#title' => t('Cookie version'),
+    '#description' => t("Increase the cookie version to force an API call and update the user's cookies. Needs to be changed when spaces are removed, added, or capacity is changed."),
+    '#states' => array(
+      // Hide the field when occuspace_use_cookie is false
+      'invisible' => array(
+          ':input[name="occuspace_use_cookie"]' => array('value' => 'false'),
+      )
+    ),
+    '#attributes' => array(
+        ' type' => 'number', // insert space before attribute name
+    ),
+    '#maxlength' => 4
+  );
   return system_settings_form($form);
 }
 
