@@ -88,7 +88,7 @@
                 ];
                 $context = stream_context_create($opts);
                 $newfile = file_get_contents($url, FALSE, $context);
-                watchdog('occuspace_data', 'Occuspace space data fetched', []);
+                watchdog('occuspace_data', 'Occuspace space data fetched using api. Url - %url', ['%url'=>$url]);
                 $jsondump = json_decode($newfile);
             }
 
@@ -123,7 +123,7 @@
                 ];
                 $contextBusy = stream_context_create($busyOpts);
                 $newfileBusy = file_get_contents($busyUrl . '/' . $row->idNumber . '/now', FALSE, $contextBusy);
-                watchdog('occuspace_data', 'Occuspace busy data fetched', []);
+                watchdog('occuspace_data', 'Occuspace busy data fetched. Url - %url', ['%url' => $busyUrl . '/' . $row->idNumber . '/now']);
                 $jsondumpBusy = json_decode($newfileBusy);
                 $row->count = isset($jsondumpBusy->data->count) ? $jsondumpBusy->data->count : '';
                 $row->percentage = isset($jsondumpBusy->data->percentage) ? round($jsondumpBusy->data->percentage * 100, 2) : '';
