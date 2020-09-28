@@ -30,6 +30,7 @@
 
             $occuspace_use_cookie = variable_get('occuspace_use_cookie', "true");
             $occuspace_cookie_version = variable_get('occuspace_cookie_version', "1");
+            $occuspace_busy_data_cookie_time = variable_get('occuspace_busy_data_cookie_time', "5");
 
             drupal_add_js(['occuspace' => ['authID' => $occuspaceAuthID]], ['type' => 'setting']);
 
@@ -99,7 +100,6 @@
             }
 
             foreach ($jsondump->data as $entry) {
-                // dsm($filterNumber);
                 if (($filterNumber > 0) && ($entry->id != $filterNumber)) {
                     continue;
                 }
@@ -115,16 +115,53 @@
                 $row->capacity = isset($entry->capacity) ? $entry->capacity : '-';
                 $row->earliestCount = isset($entry->earliestCount) ? $entry->earliestCount : '-';
                 $row->level = isset($entry->level) ? $entry->level : '_';
-                $busyOpts = [
+
+                $cookie_name = 'occuspace_busy_data_'.$row->idNumber;
+                // get cookie
+                $busy_cookie_exists = isset($_COOKIE["Drupal_visitor_".$cookie_name]);
+
+                //check if cookie exists in user's browser to eliminate the first api call for spaces data.
+                $save_new_busy_cookie = false;
+                $make_busy_api_call = false;
+
+                // admin set to not use cookie anymore. Delete cookie
+                if ($occuspace_use_cookie === 'false') {
+                  $make_busy_api_call = true;
+                  if ($busy_cookie_exists === true) {
+                    user_cookie_delete($cookie_name);
+                  }
+                }
+
+                if ($occuspace_use_cookie === 'true') {
+                  if ($busy_cookie_exists === true || $busy_cookie_exists === '1') { // cookie exists, check version
+                    $cookie_data = $_COOKIE["Drupal_visitor_".$cookie_name];
+                    $jsondumpBusy = json_decode($cookie_data);
+                    watchdog('occuspace_data', 'Occuspace busy data used from cookie. ID - %id', ['%id'=>$row->idNumber]);
+                  } else { // cookie does not exists, need to create it and save it.
+                    $make_busy_api_call = true;
+                    $save_new_busy_cookie = true;
+                  }
+                }
+
+                if ($make_busy_api_call === true) { // based on settings, api call for spaces needs to be ran
+                  $busyOpts = [
                     'http' => [
-                        'method' => 'GET',
-                        'header' => 'Authorization: Bearer ' . $occuspaceAuthID,
+                      'method' => 'GET',
+                      'header' => 'Authorization: Bearer ' . $occuspaceAuthID,
                     ],
-                ];
-                $contextBusy = stream_context_create($busyOpts);
-                $newfileBusy = file_get_contents($busyUrl . '/' . $row->idNumber . '/now', FALSE, $contextBusy);
-                watchdog('occuspace_data', 'Occuspace busy data fetched. Url - %url', ['%url' => $busyUrl . '/' . $row->idNumber . '/now']);
-                $jsondumpBusy = json_decode($newfileBusy);
+                  ];
+                  $contextBusy = stream_context_create($busyOpts);
+                  $newfileBusy = file_get_contents($busyUrl . '/' . $row->idNumber . '/now', FALSE, $contextBusy);
+                  watchdog('occuspace_data', 'Occuspace busy data fetched from api. Url - %url', ['%url' => $busyUrl . '/' . $row->idNumber . '/now']);
+                  $jsondumpBusy = json_decode($newfileBusy);
+                }
+
+                if ($save_new_busy_cookie === true) { // based on settings, cookie needs saved for this data to eliminate api call until version changes in settings
+                  $newDataBusy = json_encode($jsondumpBusy);
+                  $expireTime = intval($occuspace_busy_data_cookie_time)*60;
+                  setrawcookie('Drupal.visitor.' . $cookie_name, rawurlencode($newDataBusy), REQUEST_TIME + $expireTime, '/');
+                }
+
                 $row->count = isset($jsondumpBusy->data->count) ? $jsondumpBusy->data->count : '';
                 $row->percentage = isset($jsondumpBusy->data->percentage) ? round($jsondumpBusy->data->percentage * 100, 2) : '';
                 $row->timestamp = isset($jsondumpBusy->data->timestamp) ? $jsondumpBusy->data->timestamp : '';
