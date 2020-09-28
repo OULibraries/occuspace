@@ -88,7 +88,7 @@ function occuspace_settings() {
   $form['occuspace_busy_data_cookie_time'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('occuspace_busy_data_cookie_time', "5"),
-    '#title' => t('Cookie expire time for live data'),
+    '#title' => t('Cookie expire time for live data (in minutes)'),
     '#description' => t("Set the expire time for the live data cookie. This helps eliminate excessive API calls. Recommended to keep under 5 minutes."),
     '#states' => array(
       // Hide the field when occuspace_use_cookie is false

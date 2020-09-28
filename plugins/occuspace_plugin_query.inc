@@ -91,6 +91,8 @@
                 $newfile = file_get_contents($url, FALSE, $context);
                 watchdog('occuspace_data', 'Occuspace space data fetched using api. Url - %url', ['%url'=>$url]);
                 $jsondump = json_decode($newfile);
+                // remove message data to decrease size of obj
+                unset($jsondump->message);
             }
 
             if ($save_new_cookie === true) { // based on settings, cookie needs saved for this data to eliminate api call until version changes in settings
@@ -110,11 +112,8 @@
 
                 $row = new stdClass();
                 $row->idNumber = isset($entry->id) ? $entry->id : '';
-                $row->name = isset($entry->name) ? $entry->name : '-';
                 $row->parentId = isset($entry->parentId) ? $entry->parentId : '-';
                 $row->capacity = isset($entry->capacity) ? $entry->capacity : '-';
-                $row->earliestCount = isset($entry->earliestCount) ? $entry->earliestCount : '-';
-                $row->level = isset($entry->level) ? $entry->level : '_';
 
                 $cookie_name = 'occuspace_busy_data_'.$row->idNumber;
                 // get cookie
@@ -153,7 +152,14 @@
                   $contextBusy = stream_context_create($busyOpts);
                   $newfileBusy = file_get_contents($busyUrl . '/' . $row->idNumber . '/now', FALSE, $contextBusy);
                   watchdog('occuspace_data', 'Occuspace busy data fetched from api. Url - %url', ['%url' => $busyUrl . '/' . $row->idNumber . '/now']);
-                  $jsondumpBusy = json_decode($newfileBusy);
+                  $jsondumpBusyFull = json_decode($newfileBusy);
+                  // remove data not needed to decrease size of obj
+                  unset($jsondumpBusyFull->message);
+                  unset($jsondumpBusyFull->data->name);
+                  unset($jsondumpBusyFull->data->id);
+                  unset($jsondumpBusyFull->data->timestamp);
+                  unset($jsondumpBusyFull->data->childCounts);
+                  $jsondumpBusy = $jsondumpBusyFull;
                 }
 
                 if ($save_new_busy_cookie === true) { // based on settings, cookie needs saved for this data to eliminate api call until version changes in settings
