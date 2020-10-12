@@ -3,8 +3,13 @@
 //drupal_add_css('https://labstats.ou.edu/Content/MapViewer.css', 'external');
 //drupal_add_js('https://cdn.jsdelivr.net/excanvas/r3/excanvas.compiled.js', 'external');
 //drupal_add_js('https://labstats.ou.edu/Scripts/MapViewer.js', 'external');
-//drupal_add_js('https://code.highcharts.com/highcharts.js', 'external');
+$base_url = getcwd();
+$highcharts_filename = $base_url.'/sites/all/libraries/highcharts/js/highcharts.js';
 
+// Check if highcharts library is installed at
+if (!file_exists($highcharts_filename)) {
+  drupal_add_js('https://code.highcharts.com/highcharts.js', 'external');
+}
 /**
  * Implements hook_views_plugins().
  */
